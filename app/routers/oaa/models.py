@@ -1,5 +1,5 @@
 from pydantic import BaseModel, AnyHttpUrl, Field
-from typing import List, Optional, Dict, Literal
+from typing import Any, List, Optional, Dict, Literal
 from datetime import datetime
 
 class Endpoint(BaseModel):
