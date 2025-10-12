@@ -1,4 +1,4 @@
-# Lab7-Proof — Open Attestation Authority (OAA)
+# Lab7-Proof — Online Apprenticeship Agent (OAA)
 
 > "Integrity is the proof that outlives its creator." — *Kaizen_Michael*
 
