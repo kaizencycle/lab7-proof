@@ -1,0 +1,66 @@
+# --- Python / FastAPI
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtualenv / tooling
+.venv/
+.venv*/
+env/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.dmypy.json
+.pyre/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Coverage
+htmlcov/
+.coverage*
+.tox/
+
+# Node (if you add a minimal client or tooling)
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Render / deployment artifacts
+render.yaml.local
+.tmp/
+.cache/
+
+# Secrets & env
+.env
+.env.*
+!env.example
+*.pem
+*.key
+*.crt
+*.p12
+
+# Keys & attestations (keep only samples)
+keys/
+attestations/*.raw.json
+attestations/*.signed.json
+
+# Local data
+data/
+!data/.gitkeep
