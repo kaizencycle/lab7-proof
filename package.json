@@ -1,0 +1,12 @@
+{
+  "name": "@gic/oaa-verify",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "oaa-verify": "./bin/oaa-verify.js"
+  },
+  "dependencies": {
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {}
+}
