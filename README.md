@@ -6,7 +6,7 @@
 
 ## 🌐 Overview
 
-**Lab7-Proof** is the verification engine of the Kaizen DVA / HIVE ecosystem. It anchors every signed act — reflections, governance votes, civic contributions — to a cryptographically verifiable attestation chain.
+**Lab7-Proof** is the verification engine of the Kaizen HIVE ecosystem. It anchors every signed act — reflections, governance votes, civic contributions — to a cryptographically verifiable attestation chain.
 
 Built as both:
 - **An API** (`/oaa`) for machines, and
@@ -301,5 +301,6 @@ This project is part of the Kaizen DVA ecosystem and follows the Civic Protocol 
 5. Open a Pull Request
 
 ## 📞 Support
+
 
 For questions and support, please open an issue in this repository or contact the Kaizen DVA team.
