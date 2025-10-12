@@ -1,8 +1,11 @@
 from fastapi import FastAPI
+from fastapi.templating import Jinja2Templates
 from app.routers.oaa import router as oaa_router
 from app.routers.health import router as health_router
 from app.routers.health_auth import router as health_auth_router
 from app.routers.health_redis import router as health_redis_router
+from app.routers.oaa.verify_history import router as verify_history_router
+from app.routers.oaa.keys_page import router as keys_page_router
 import os
 
 app = FastAPI(
@@ -16,6 +19,8 @@ app.include_router(oaa_router)
 app.include_router(health_router)
 app.include_router(health_auth_router)
 app.include_router(health_redis_router)
+app.include_router(verify_history_router)
+app.include_router(keys_page_router)
 
 # Set admin token from environment
 oaa_router.ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
