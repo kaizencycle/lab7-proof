@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: lab7-proof-api
+    runtime: python
+    envVars:
+      - key: OAA_ED25519_PRIVATE_B64
+        sync: false
+      - key: OAA_ED25519_PUBLIC_B64
+        sync: false
+      - key: OAA_ISSUER
+        value: oaa.lab7
+      - key: OAA_VERIFY_PIN_KEYS
+        value: "true"
+      - key: OAA_VERIFY_TS_WINDOW_MIN
+        value: "10"
+      - key: OAA_NONCE_TTL_SEC
+        value: "600"
+      # Optional Redis:
+      # - key: OAA_NONCE_REDIS_URL
+      #   value: redis://default:PASS@HOST:6379/0
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
