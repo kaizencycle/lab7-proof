@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, json, os, datetime
+import argparse, json, os, statistics, datetime
 
 def parse_args():
     ap = argparse.ArgumentParser()
