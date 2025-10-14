@@ -55,6 +55,8 @@ render.yaml.local
 *.key
 *.crt
 *.p12
+*.env
+*_state.json
 
 # Keys & attestations (keep only samples)
 keys/
