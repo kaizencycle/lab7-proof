@@ -16,6 +16,12 @@
 - 🌐 **Cloud Deployment** — Ready for Render, AWS, or other cloud providers
 - 📊 **Dashboard Interface** — User-friendly verification and management tools
 
+<!-- PAL DASHBOARD START -->
+
+_This section will be auto-populated by the dashboard workflow._
+
+<!-- PAL DASHBOARD END -->
+
 ## 🏗️ Architecture
 
 OAA is built with modern, secure technologies:
