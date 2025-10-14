@@ -7,3 +7,4 @@ router = APIRouter()
 @router.get("/health")
 def health():
     return {"ok": True, "ts": datetime.utcnow().isoformat() + "Z"}
+

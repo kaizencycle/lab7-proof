@@ -49,6 +49,8 @@ def root():
             "healthz": "/healthz",
             "health_auth": "/health/auth",
             "redis_health": "/_health/redis",
+            "oaa_redis_health": "/oaa/_health/redis",
             "echo_ingest": "/oaa/echo/ingest"
         }
     }
+

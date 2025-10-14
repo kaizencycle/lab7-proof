@@ -80,3 +80,4 @@ def pal_model_card(version: str):
     if not os.path.exists(p):
         return {"error": "model card not found"}
     return json.load(open(p))
+

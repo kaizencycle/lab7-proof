@@ -12,7 +12,7 @@ from pydantic import BaseModel
 ECHO_LOG_DIR = Path(os.getenv("ECHO_LOG_DIR", "./echo_logs")).resolve()
 OAA_BEARER   = os.getenv("OAA_BEARER", "")  # optional; if set, GET endpoints can require it
 
-router = APIRouter(prefix="/oaa/echo", tags=["oaa-echo"])
+router = APIRouter(prefix="/echo", tags=["oaa-echo"])
 
 # ---------- Security (optional) ----------
 def require_bearer(authorization: Optional[str] = Header(default=None)):
@@ -103,8 +103,3 @@ def list_echo_pulses(
 def echo_api_health():
     # Lightweight route so your Sentinel can check this module specifically
     return {"status": "ok", "module": "oaa_echo_routes", "ts": int(time.time())}
-
-@router.post("/ingest")
-def oaa_echo_ingest(pulse: EchoPulseIngest):
-    # TODO: validate + persist + maybe anchor depending on policy
-    return {"status": "accepted", "key": pulse.fingerprint}

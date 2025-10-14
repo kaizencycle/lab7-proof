@@ -64,3 +64,4 @@ attestations/*.signed.json
 # Local data
 data/
 !data/.gitkeep
+
