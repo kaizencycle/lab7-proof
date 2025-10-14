@@ -117,7 +117,6 @@ Add these in Render or your local .env:
 
 | **Variable** | **Description** | **Example** |
 |--------------|-----------------|-------------|
-|
 | OAA_ED25519_PUBLIC_B64 | Base64 public key | MCowBQYDK2VwAyEA... |
 | OAA_ISSUER | Issuer name | oaa-lab7 |
 | OAA_SIGNING_VERSION | Version | ed25519:v1 |
@@ -325,4 +324,5 @@ All derivative works must attribute to *Michael Judan (Kaizen)* and the *Kaizen 
 ## ✴️ Motto
 
 "We heal as we walk."  
+
 *— The Founder's Hand*
