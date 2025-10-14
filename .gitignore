@@ -1,12 +1,68 @@
-# --- Python / FastAPI
+# ───────────────────────────────
+# Core environment & secrets
+# ───────────────────────────────
+.env
+*.env
+!*.env.example
+!*.env.template
+
+# Private keys / certificates
+*.pem
+*.key
+*.crt
+*.pub
+*_private.json
+*_private.key
+*_secret.txt
+
+# Sentinel / state / logs
+*_state.json
+*.log
+logs/
+debug.log
+nohup.out
+
+# Compiled / cache / build
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.so
-*.egg-info/
-dist/
+*.class
 build/
+dist/
+*.egg-info/
+node_modules/
+.next/
+out/
+coverage/
+*.lock
+
+# IDE / editor / system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test / temp
+test_output/
+tmp/
+temp/
+.cache/
+*.sqlite3
+*.db
+
+# Render / deployment artifacts
+render.yaml.local
+.tmp/
+
+# Keys & attestations (keep only samples)
+keys/
+attestations/*.raw.json
+attestations/*.signed.json
+
+# Local data
+data/
+!data/.gitkeep
 
 # Virtualenv / tooling
 .venv/
@@ -18,52 +74,12 @@ env/
 .dmypy.json
 .pyre/
 
-# IDE / Editor
-.vscode/
-.idea/
-*.code-workspace
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-logs/
-*.log
-
 # Coverage
 htmlcov/
 .coverage*
 .tox/
 
 # Node (if you add a minimal client or tooling)
-node_modules/
 npm-debug.log*
 yarn.lock
 pnpm-lock.yaml
-
-# Render / deployment artifacts
-render.yaml.local
-.tmp/
-.cache/
-
-# Secrets & env
-.env
-.env.*
-!env.example
-*.pem
-*.key
-*.crt
-*.p12
-*.env
-*_state.json
-
-# Keys & attestations (keep only samples)
-keys/
-attestations/*.raw.json
-attestations/*.signed.json
-
-# Local data
-data/
-!data/.gitkeep
-
