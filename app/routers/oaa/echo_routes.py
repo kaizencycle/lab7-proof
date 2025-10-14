@@ -33,6 +33,11 @@ class EchoPulse(BaseModel):
     global_health: Optional[dict] = None
     fingerprint_sha256: str
 
+class EchoPulseIngest(BaseModel):
+    source: str
+    fingerprint: str
+    payload: dict
+
 # ---------- Utilities ----------
 def _list_echo_files(limit: int = 50) -> List[Path]:
     if not ECHO_LOG_DIR.exists():
@@ -98,3 +103,8 @@ def list_echo_pulses(
 def echo_api_health():
     # Lightweight route so your Sentinel can check this module specifically
     return {"status": "ok", "module": "oaa_echo_routes", "ts": int(time.time())}
+
+@router.post("/ingest")
+def oaa_echo_ingest(pulse: EchoPulseIngest):
+    # TODO: validate + persist + maybe anchor depending on policy
+    return {"status": "accepted", "key": pulse.fingerprint}
