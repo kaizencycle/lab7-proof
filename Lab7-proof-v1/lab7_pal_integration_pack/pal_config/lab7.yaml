@@ -1,0 +1,13 @@
+# Minimal config for Lab7-Proof × PAL
+backend:
+  health_route: /v1/health
+  service_id_env: LAB7_BACKEND_SERVICE_ID
+
+frontend:
+  health_route: /
+  service_id_env: LAB7_FRONTEND_SERVICE_ID
+
+pal:
+  episodes_path_env: PAL_EPISODES_PATH
+  policy_path_env: PAL_POLICY_PATH
+  modelcard_dir_env: PAL_MODELCARD_DIR

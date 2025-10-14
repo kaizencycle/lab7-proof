@@ -1,0 +1,26 @@
+name: deploy-render
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy API to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.LAB7_RENDER_API_KEY }}
+          SERVICE_ID:     ${{ secrets.LAB7_BACKEND_SERVICE_ID }}
+        run: |
+          curl -X POST https://api.render.com/v1/services/$SERVICE_ID/deploys             -H "Authorization: Bearer $RENDER_API_KEY"             -H "Content-Type: application/json"             -d '{"clearCache":false}'
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Web to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.LAB7_RENDER_API_KEY }}
+          SERVICE_ID:     ${{ secrets.LAB7_FRONTEND_SERVICE_ID }}
+        run: |
+          if [ -z "$SERVICE_ID" ]; then echo "No frontend service id provided, skipping."; exit 0; fi
+          curl -X POST https://api.render.com/v1/services/$SERVICE_ID/deploys             -H "Authorization: Bearer $RENDER_API_KEY"             -H "Content-Type: application/json"             -d '{"clearCache":false}'

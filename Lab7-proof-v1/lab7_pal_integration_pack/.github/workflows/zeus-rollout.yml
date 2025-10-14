@@ -1,0 +1,35 @@
+name: zeus-rollout
+on:
+  pull_request:
+    types: [opened, synchronize, labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  shadow-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install trainers
+        run: |
+          python -m pip install --upgrade pip
+          pip install scikit-learn numpy
+      - name: Offline eval (toy)
+        run: |
+          python trainers/reward_model/train_rm.py --episodes ledger/episodes.jsonl --out ledger/reward_models/rm_ci.pkl || true
+          python trainers/bandit/train_linucb.py --episodes ledger/episodes.jsonl --out ledger/policies/linucb_ci.json
+      - name: Gate (replace with real KPI checks)
+        run: |
+          echo "OK"  # TODO: fail if metrics regress
+      - name: (Optional) Add automerge label
+        if: ${{ secrets.LAB7_AUTOLABEL_TOKEN != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.LAB7_AUTOLABEL_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          number="${PR_URL##*/}"
+          gh pr edit "$number" --add-label "automerge:safe" || true

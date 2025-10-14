@@ -1,0 +1,47 @@
+name: deploy-render-hardcoded
+on:
+  push:
+    branches: [ main ]
+
+env:
+  HEALTH_RETRIES: 30
+  HEALTH_SLEEP: 10
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy API to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.LAB7_RENDER_API_KEY }}
+        run: |
+          curl -X POST https://api.render.com/v1/services/__LAB7_BACKEND_SERVICE_ID__/deploys             -H "Authorization: Bearer $RENDER_API_KEY"             -H "Content-Type: application/json"             -d '{"clearCache":false}'
+      - name: Wait for backend health
+        run: |
+          for i in $(seq 1 $HEALTH_RETRIES); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "__LAB7_BACKEND_HEALTH_URL__" || true)
+            echo "Attempt $i: $code"
+            if [ "$code" = "200" ]; then echo "Backend healthy"; exit 0; fi
+            sleep $HEALTH_SLEEP
+          done
+          echo "Backend failed health checks"; exit 1
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Web to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.LAB7_RENDER_API_KEY }}
+        run: |
+          if [ -z "__LAB7_FRONTEND_SERVICE_ID__" ]; then echo "No frontend service id provided, skipping."; exit 0; fi
+          curl -X POST https://api.render.com/v1/services/__LAB7_FRONTEND_SERVICE_ID__/deploys             -H "Authorization: Bearer $RENDER_API_KEY"             -H "Content-Type: application/json"             -d '{"clearCache":false}'
+      - name: Wait for frontend health
+        run: |
+          if [ -z "__LAB7_FRONTEND_HEALTH_URL__" ]; then echo "No LAB7_FRONTEND_HEALTH_URL set; skipping health check."; exit 0; fi
+          for i in $(seq 1 $HEALTH_RETRIES); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "__LAB7_FRONTEND_HEALTH_URL__" || true)
+            echo "Attempt $i: $code"
+            if [ "$code" = "200" ]; then echo "Frontend healthy"; exit 0; fi
+            sleep $HEALTH_SLEEP
+          done
+          echo "Frontend failed health checks"; exit 1

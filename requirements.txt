@@ -10,3 +10,5 @@ httpx
 PyNaCl
 jinja2
 PyYAML
+numpy>=1.26.4
+scikit-learn>=1.5.2

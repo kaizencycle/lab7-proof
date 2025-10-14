@@ -1,0 +1,21 @@
+name: zeus-rollout
+on:
+  pull_request:
+    types: [opened, synchronize, labeled]
+
+jobs:
+  shadow-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Offline eval (toy)
+        run: |
+          python trainers/reward_model/train_rm.py --episodes ledger/episodes.jsonl --out ledger/reward_models/rm_ci.pkl || true
+          python trainers/bandit/train_linucb.py --episodes ledger/episodes.jsonl --out ledger/policies/linucb_ci.json
+      - name: Gate (toy thresholds)
+        run: |
+          echo "OK";  # replace with real KPI gates, then label automerge:safe via GitHub API if pass

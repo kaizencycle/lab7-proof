@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "path": "api/routes/health.py",
+      "content": "from fastapi import APIRouter\nrouter = APIRouter()\n@router.get('/v1/health')\ndef health():\n    return {'ok': True}\n"
+    }
+  ],
+  "constraints": {
+    "allow_paths": [
+      "api/",
+      "tests/"
+    ],
+    "max_added_lines": 400
+  }
+}
