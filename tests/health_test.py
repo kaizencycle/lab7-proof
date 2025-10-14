@@ -1,7 +1,7 @@
 import os, json, requests
 
 def test_backend_health():
-    url = os.environ.get("LAB7_BACKEND_HEALTH_URL", "https://hive-api-2le8.onrender.com/v1/health")
+    url = os.environ.get("LAB7_BACKEND_HEALTH_URL", "http://localhost:8000/v1/health")
     try:
         r = requests.get(url, timeout=2)
         assert r.status_code == 200

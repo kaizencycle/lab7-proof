@@ -44,7 +44,7 @@ jobs:
 
       - name: Wait for Backend Health
         env:
-          HEALTH_URL: ${{ vars.LAB7_BACKEND_HEALTH_URL || 'https://hive-api-2le8.onrender.com/v1/health' }}
+          HEALTH_URL: ${{ vars.LAB7_BACKEND_HEALTH_URL }}
         run: |
           for i in {1..30}; do
             if curl -f "$HEALTH_URL" >/dev/null 2>&1; then
@@ -60,7 +60,7 @@ jobs:
       - name: Wait for Frontend Health (if exists)
         if: vars.LAB7_FRONTEND_HEALTH_URL != ''
         env:
-          HEALTH_URL: ${{ vars.LAB7_FRONTEND_HEALTH_URL || 'https://lab6-proof-api.onrender.com/' }}
+          HEALTH_URL: ${{ vars.LAB7_FRONTEND_HEALTH_URL }}
         run: |
           for i in {1..30}; do
             if curl -f "$HEALTH_URL" >/dev/null 2>&1; then
