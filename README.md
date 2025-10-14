@@ -16,6 +16,10 @@
 - 🌐 **Cloud Deployment** — Ready for Render, AWS, or other cloud providers
 - 📊 **Dashboard Interface** — User-friendly verification and management tools
 
+<!-- PAL BADGES START -->
+![PAL Rollout](docs/badges/pal_rollout.svg) ![PAL Safety](docs/badges/pal_safety.svg)
+<!-- PAL BADGES END -->
+
 <!-- PAL DASHBOARD START -->
 
 _This section will be auto-populated by the dashboard workflow._
