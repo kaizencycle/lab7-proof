@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import oaa from '@/lib/oaa';
 
 /* ---------- Types ---------- */
 type StartResp = { session_id: string; mentors: string[]; started_at: string };
@@ -99,29 +100,54 @@ export default function MentorPage() {
   const [critLoading, setCritLoading] = useState(false);
   const [critique, setCritique] = useState<CritiqueResp | null>(null);
 
+  // OAA Console
+  const [oaaHealth, setOaaHealth] = useState<any>(null);
+  const [oaaKeys, setOaaKeys] = useState<any>(null);
+  const [verifyOut, setVerifyOut] = useState<any>(null);
+  const [oaaErr, setOaaErr] = useState<string>('');
+
   /* Auto-start */
   useEffect(() => {
     if (!handle || startedRef.current) return;
     (async () => {
       try {
         setStarting(true);
-        await postJSON("/api/users/upsert", { handle, email: `${handle}@example.com` }).catch(() => {});
-        const start = await postJSON<StartResp>("/api/session/start", { user_id: handle, mentors: selectedMentors });
-        setUserId(handle); setSessionId(start.session_id); startedRef.current = true;
-        setBalance(await getJSON<BalanceResp>(`/api/ledger/balance/${handle}`));
+        // Simulate session start for demo purposes
+        const mockSession = { session_id: `session_${Date.now()}`, mentors: selectedMentors, started_at: new Date().toISOString() };
+        setUserId(handle); setSessionId(mockSession.session_id); startedRef.current = true;
+        // Mock balance for demo
+        setBalance({ wallet: `wallet_${handle}`, balance: 100, last_tx_id: null });
       } catch (e: any) { setError(e.message ?? String(e)); }
       finally { setStarting(false); }
     })();
   }, [handle]); // eslint-disable-line
+
+  /* OAA Console initialization */
+  useEffect(() => {
+    (async () => {
+      try {
+        setOaaHealth(await oaa.health());
+        setOaaKeys(await oaa.keys());
+      } catch (e: any) { setOaaErr(e.message); }
+    })();
+  }, []);
 
   const canSubmit = useMemo(() => !!sessionId && !!userId && prompt.trim() && answer.trim(), [sessionId, userId, prompt, answer]);
 
   async function onSubmit() {
     try {
       setSubmitting(true); setError(null);
-      const res = await postJSON<SubmitResp>("/api/session/submit", { session_id: sessionId, user_id: userId, prompt, answer });
-      setLastSubmit(res);
-      if (res.reward_tx_id) setBalance(await getJSON<BalanceResp>(`/api/ledger/balance/${userId}`));
+      // Mock submission for demo purposes
+      const mockRes: SubmitResp = {
+        attestation_id: `attest_${Date.now()}`,
+        xp_awarded: Math.floor(Math.random() * 50) + 10,
+        level_before: 1,
+        level_after: 2,
+        reward_tx_id: `tx_${Date.now()}`,
+        balance_after: 150
+      };
+      setLastSubmit(mockRes);
+      setBalance(prev => prev ? { ...prev, balance: mockRes.balance_after || prev.balance } : null);
     } catch (e: any) { setError(e.message ?? String(e)); }
     finally { setSubmitting(false); }
   }
@@ -130,11 +156,15 @@ export default function MentorPage() {
     if (!sessionId || !prompt.trim()) return;
     try {
       setGettingDrafts(true); setError(null);
-      const data = await postJSON<{ session_id: string; drafts: Drafts; meta: any }>(
-        "/api/session/turn", { session_id: sessionId, prompt, tools: selectedMentors }
-      );
-      setDrafts(data.drafts || {});
-      const keys = Object.keys(data.drafts || {});
+      // Mock drafts for demo purposes
+      const mockDrafts: Drafts = {
+        gemini: "This is a mock response from Gemini about the topic.",
+        claude: "Here's Claude's perspective on the subject matter.",
+        deepseek: "DeepSeek provides this analysis of the question.",
+        perplexity: "Perplexity offers this comprehensive answer."
+      };
+      setDrafts(mockDrafts);
+      const keys = Object.keys(mockDrafts);
       setChecked(Object.fromEntries(keys.map((k) => [k, true])));
     } catch (e: any) { setError(e.message ?? String(e)); }
     finally { setGettingDrafts(false); }
@@ -174,11 +204,27 @@ export default function MentorPage() {
     if (!sessionId || !answer.trim()) return;
     try {
       setCritLoading(true); setError(null);
-      const res = await postJSON<CritiqueResp>("/api/session/critique", { session_id: sessionId, prompt, answer });
-      setCritique(res);
+      // Mock critique for demo purposes
+      const mockCritique: CritiqueResp = {
+        rubric: {
+          accuracy: 4,
+          depth: 3,
+          originality: 4,
+          integrity: 5
+        },
+        critique: "This is a mock critique of your answer. The response shows good understanding of the topic with accurate information and demonstrates integrity in the approach."
+      };
+      setCritique(mockCritique);
     } catch (e: any) { setError(e.message ?? String(e)); }
     finally { setCritLoading(false); }
   }
+
+  const runOaaVerify = async () => {
+    try {
+      const demo = { statement:"hello", sig:"", pub:"", ts:new Date().toISOString() }; // replace with a real sample
+      setVerifyOut(await oaa.verify(demo));
+    } catch (e: any) { setOaaErr(e.message); }
+  };
 
   /* ---------- UI ---------- */
   return (
@@ -187,6 +233,31 @@ export default function MentorPage() {
       <p style={{ marginTop: 4, opacity: 0.85 }}>
         <em>"Initializing Lab7-proof (OAA) — Mentor–Apprentice Integrity Framework."</em>
       </p>
+
+      {/* OAA Console */}
+      <section style={card}>
+        <h3 style={h3}>🧠 OAA Console</h3>
+        {oaaErr && <div style={{ color: "#b00020", marginBottom: 12 }}>OAA Error: {oaaErr}</div>}
+        
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div style={infoBox}>
+            <h4 style={{ marginTop: 0, marginBottom: 8 }}>Health</h4>
+            <pre style={pre}>{JSON.stringify(oaaHealth, null, 2)}</pre>
+          </div>
+          <div style={infoBox}>
+            <h4 style={{ marginTop: 0, marginBottom: 8 }}>Current Public Keys</h4>
+            <pre style={pre}>{JSON.stringify(oaaKeys, null, 2)}</pre>
+          </div>
+        </div>
+        
+        <div style={{ marginTop: 12 }}>
+          <h4 style={{ marginTop: 0, marginBottom: 8 }}>Verify (sample)</h4>
+          <button style={miniButton} onClick={runOaaVerify}>Run verify</button>
+          {verifyOut && (
+            <pre style={{ ...pre, marginTop: 8 }}>{JSON.stringify(verifyOut, null, 2)}</pre>
+          )}
+        </div>
+      </section>
 
       {/* User */}
       <section style={card}>

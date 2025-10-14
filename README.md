@@ -1,306 +1,328 @@
-# Lab7-Proof — Online Apprenticeship Agent (OAA)
+# 🧠 Lab7 — Open Attestation Authority (OAA)
+### A Civic Ledger Apprenticeship Engine for the Kaizen DVA Ecosystem  
+> _"Proof of Integrity is the new Proof of Work."_
 
-> "Integrity is the proof that outlives its creator." — *Kaizen_Michael*
+---
 
-[![CI](https://github.com/kaizencycle/lab7-proof/actions/workflows/ci.yml/badge.svg)](https://github.com/kaizencycle/lab7-proof/actions/workflows/ci.yml)
-
-## 🌐 Overview
-
-**Lab7-Proof** is the verification engine of the Kaizen HIVE ecosystem. It anchors every signed act — reflections, governance votes, civic contributions — to a cryptographically verifiable attestation chain.
-
-Built as both:
-- **An API** (`/oaa`) for machines, and
-- **A Public Site** for citizens and developers to verify attestations.
-
-## 🧭 Architecture
+## 🪞 Civic Pipeline Snapshot
 
 ```
-                    ┌──────────────────────────────────────────────┐
-                    │                 Users / Apps                 │
-                    │──────────────────────────────────────────────│
-                    │  Reflections App │ Citizen Shield │ OAA SDK  │
-                    └──────────────┬───────────────────────────────┘
-                                   │
-                                   ▼
-                      ┌────────────────────────┐
-                      │      Lab7-Proof API    │
-                      │ (FastAPI / Render)     │
-                      ├────────────────────────┤
-                      │ • /oaa/state/anchor    │ → sign attestation
-                      │ • /oaa/verify          │ → check validity
-                      │ • /.well-known/oaa-keys│ → key registry (Ed25519)
-                      └──────────────┬─────────┘
-                                     │
-                     attestations.json│
-                                     ▼
-                      ┌────────────────────────┐
-                      │  GitHub Pages Site     │
-                      │ (kaizencycle.github.io)│
-                      ├────────────────────────┤
-                      │  verify.html           │ → paste attestation
-                      │  oaa-verify.js         │ → browser verifier
-                      │  README + docs         │
-                      └──────────────┬─────────┘
-                                     │
-                   ┌─────────────────┴──────────────────┐
-                   │                                    │
-          ┌────────────────────┐              ┌────────────────────┐
-          │ CLI  oaa-verify    │              │ Node/TS SDK        │
-          │ (npm or Release)   │              │ (import verifier)  │
-          └────────────────────┘              └────────────────────┘
+    ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
+    │   Lab4 🪞     │         │   Lab7 🧠     │         │ Civic Ledger ⛓️ │
+    │ Reflections   │──sync──▶│ OAA / Verify │──anchor▶│ Integrity Core │
+    │ Memory & Logs │         │ Keys & Attest│         │ Attest & Audit │
+    └──────────────┘         └──────────────┘         └──────────────┘
+              ▲                         │
+              │                         ▼
+      (User Journals)           (STEM Modules & Agents)
 ```
 
-## 🧩 Components
+### 🧩 Legend
+- **Lab4 → Lab7:** user reflections become attestations.  
+- **Lab7 → Ledger:** attestations become immutable civic proofs.  
+- **Agents:** serve as mentors & verifiers in STEM apprenticeship.  
+- **End result:** proof-of-integrity economy powered by human learning.
 
-| Component | Type | Description |
-|-----------|------|-------------|
-| **Lab7-Proof API** | FastAPI service | Anchors & signs attestations |
-| **Public Verifier Site** | GitHub Pages | Browser-based attestation verifier |
-| **OAA-Verify CLI** | Node JS CLI | Offline or CI-based verification tool |
-| **Node/TS SDK** | npm library | Importable verifier for partner projects |
+---
 
-## 🚀 Quickstart
+## 🌍 Overview
 
-### 1️⃣ Verify via Browser
+**Lab7 (OAA)** is the **Open Attestation Authority**, a cryptographic verification and teaching module inside the Kaizen DVA ecosystem.  
+It bridges **STEM education**, **AI mentorship**, and **verifiable credentials** through attestation endpoints and learning dashboards.
 
-➡ **[Live Verifier](https://kaizencycle.github.io/lab7-proof/verify.html)**
+OAA is powered by:
 
-Paste any attestation JSON → click **Verify** → shows VALID ✅ or INVALID ❌.
+- 🧩 **FastAPI backend** — verifies and issues digital attestations  
+- ⚙️ **Ed25519 cryptography** — signs integrity proofs via public/private key pairs  
+- 🧭 **Next.js frontend (Reflections)** — visual learning console for AI mentors and apprentices  
+- 🔗 **Render Cloud deployment** — API + static site integration  
+- 🧠 **Civic Ledger integration** — optional blockchain-style integrity anchoring  
 
-### 2️⃣ Verify via CLI
+---
 
-```bash
-curl -O https://github.com/kaizencycle/lab7-proof/releases/latest/download/oaa-verify.js
-chmod +x oaa-verify.js
-./oaa-verify.js attestation.json --keyset https://hive-api-2le8.onrender.com
+## 🧩 System Architecture
+
+```plaintext
+             ┌─────────────────────┐
+             │  Frontend (Lab7 UI) │
+             │  Next.js 14 / React │
+             │  → /mentor          │
+             │  → /verify          │
+             │  → /keys dashboard  │
+             └─────────┬───────────┘
+                       │
+                       ▼
+             ┌─────────────────────┐
+             │  Lab7 API (FastAPI) │
+             │  /oaa/ingest        │
+             │  /oaa/filter        │
+             │  /oaa/verify        │
+             │  /oaa/keys          │
+             └─────────┬───────────┘
+                       │
+                       ▼
+             ┌─────────────────────┐
+             │  Crypto Engine      │
+             │  Ed25519, SHA-256   │
+             │  + Redis Nonce Def. │
+             └─────────┬───────────┘
+                       │
+                       ▼
+             ┌─────────────────────┐
+             │  Civic Ledger Core  │
+             │  (Optional anchor)  │
+             │  /ledger/attest     │
+             │  /ledger/verify     │
+             └─────────────────────┘
 ```
 
-### 3️⃣ Verify via Node SDK
+---
 
-```bash
-npm install tweetnacl undici
-```
+## 🚀 Quick Start
 
-```typescript
-import { verifyAttestation, signerIsKnown } from "@gic/oaa-verify";
-```
-
-## 🔑 Key Registry
-
-All public keys for Lab7-Proof signing are available at:
-
-https://hive-api-2le8.onrender.com/.well-known/oaa-keys.json
-
-## 🔏 Verifying OAA Attestations
-
-This repo publishes signed attestations (Ed25519) and a well-known keyset. Partners can verify three ways:
-
-### 1) Web Verifier (no install)
-
-Open our hosted page and paste the attestation JSON.
-- **URL:** https://kaizencycle.github.io/lab7-proof/verify.html
-- **Steps:**
-  1. Paste the attestation returned by `/oaa/repute/vote` or `/oaa/state/anchor`.
-  2. (Recommended) Enter the OAA base URL and enable **Key Pinning** (it fetches `/.well-known/oaa-keys.json`).
-  3. Keep **Timestamp window** on (default ±10 min).
-  4. Click **Verify** → you'll see VALID/INVALID and details.
-  5. Use **Copy Result** to share the verification proof.
-
-### 2) CLI (single script)
-
-Download the release artifact (`oaa-verify.js`) from the **Releases** page, make it executable, and run:
-
-```bash
-./oaa-verify.js attestation.json \
-  --keyset https://your-lab7-api.onrender.com
-```
-
-**Output**
+**1. Clone the repository**
 
 ```
-VALID: { recomputed_hash: "...", ... }
-```
-
-or
-
-```
-INVALID: { reason: "hash_mismatch" | "signature_invalid" | "unknown_signing_key" | ... }
-```
-
-### 3) Node / TypeScript module
-
-Install deps and use the verifier helpers.
-
-```bash
-npm i tweetnacl undici
-```
-
-```typescript
-// oaa-verify.ts (example)
-import nacl from "tweetnacl";
-import { createHash } from "crypto";
-
-function sortKeys(x:any){ 
-  if(Array.isArray(x)) return x.map(sortKeys);
-  if(x && typeof x==="object"){ 
-    const o:Record<string,any>={};
-    for(const k of Object.keys(x).sort()) o[k]=sortKeys(x[k]); 
-    return o; 
-  }
-  return x; 
-}
-
-const canonicalJSON = (obj:any)=> JSON.stringify(sortKeys(obj));
-const sha256Hex = (s:string)=> createHash("sha256").update(s,"utf8").digest("hex");
-const b64 = (s:string)=> new Uint8Array(Buffer.from(s,"base64"));
-
-export function verifyAttestation(att:any){
-  const canon = canonicalJSON(att.content);
-  const recomputed = sha256Hex(canon);
-  const got = (att.content_hash||"").replace(/^sha256:/,"");
-  if(got !== recomputed) return { ok:false, reason:"hash_mismatch", recomputed_hash:recomputed };
-
-  if(!att.signature?.startsWith("ed25519:")) return { ok:false, reason:"bad_sig_format" };
-  const sig = b64(att.signature.slice(8));
-  const pub = b64(att.public_key_b64);
-  const ok = nacl.sign.detached.verify(Buffer.from(canon,"utf8"), sig, pub);
-  return ok ? { ok:true, recomputed_hash:recomputed } : { ok:false, reason:"signature_invalid" };
-}
-
-// Optional: key pinning via well-known keyset
-export async function signerIsKnown(baseUrl:string, pubKeyB64:string){
-  const res = await fetch(`${baseUrl.replace(/\/$/,"")}/.well-known/oaa-keys.json`);
-  if(!res.ok) throw new Error(`Keyset fetch failed: ${res.status}`);
-  const ks = await res.json();
-  const allowed = new Set((ks.keys||[]).map((k:any)=>k.x));
-  return allowed.has(pubKeyB64);
-}
-```
-
-**Usage**
-
-```typescript
-const okKey = await signerIsKnown("https://your-lab7-api.onrender.com", att.public_key_b64);
-if(!okKey) throw new Error("unknown_signing_key");
-const result = verifyAttestation(att);
-console.log(result);
-```
-
-## 🧱 Governance Context
-
-**Lab7-Proof** belongs to the broader *Civic Intelligence Stack*:
-
-| Layer | Description |
-|-------|-------------|
-| Lab4-Proof | Reflections (personal diary + journaling memory) |
-| Lab6-Proof | Citizen Shield (digital security & consent) |
-| **Lab7-Proof** | **Open Attestation Authority (OAA)** – proof of integrity |
-| Civic Ledger | Immutable chain of civic actions (GIC mint/burn events) |
-
-## 🔁 Integrity Loop
-
-1. **Event happens** → Reflection / Ledger entry → API generates attestation.
-2. **Attestation signed** → stored in Ledger and mirrored to GitHub Pages.
-3. **Citizen / Dev / Auditor** → verifies signature through site or CLI.
-4. **Consensus** → Civic Commons Wallet rewards verified integrity.
-
-## ✅ Security Checklist (recommended)
-
-- **Key pinning:** Always confirm `public_key_b64` appears in our `/.well-known/oaa-keys.json` (or use a pinned value in your config).
-- **Canonical JSON:** Verify against a stable, sorted-key JSON string before checking the signature.
-- **Timestamp window:** Reject if `content.ts` is too far from now (e.g., ±10 minutes) to reduce replay risk.
-- **Nonce replay:** For state-changing endpoints, include nonce + voter_id in the content and enforce single use (server side we use Redis SETNX + TTL).
-- **Key rotation:** We keep previous public keys in the keyset as legacy during rotations; pin to **kid/version** where possible.
-
-## 🧪 Test Endpoints
-
-- `GET /oaa/state/snapshot` – deterministic snapshot & content hash
-- `POST /oaa/state/anchor` – returns signed attestation (+ optional ledger receipt)
-- `POST /oaa/verify` – server-side verification (hash, signature, key pinning, ts, nonce)
-
-All endpoints are on the Lab7 API base:
-
-https://hive-api-2le8.onrender.com
-
-## 🧮 Roadmap
-
-- Integrate with GIC mint/burn attestations
-- Add federation of keys across all Lab APIs
-- Add AI companion attestations (Jade, Eve, Zeus, etc.)
-- Publish npm SDK (`@gic/oaa-verify`)
-- Deploy global verifier mirror on verify.gic.ai
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Python 3.11+
-- Redis (optional, for nonce replay defense)
-
-### Setup
-
-```bash
-# Clone the repository
 git clone https://github.com/kaizencycle/lab7-proof.git
 cd lab7-proof
+```
 
-# Create virtual environment
+---
+
+**2. Backend (FastAPI)**
+
+```
+# Create and activate virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Install development tools
-pip install black ruff mypy pytest detect-secrets pre-commit
-
-# Install pre-commit hooks
-pre-commit install
-pre-commit install --hook-type pre-push
+# Start the API
+uvicorn app.main:app --reload
 ```
 
-### Running the API
+Your API should now be available at:  
+👉 http://localhost:8000/docs  
 
-```bash
-# Development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+Health check:  
+👉 http://localhost:8000/health  
 
-# Or use Cursor tasks
-# Command Palette → "Run Task" → "Start API (dev)"
+---
+
+**3. Environment Variables**
+
+Add these in Render or your local .env:
+
+| **Variable** | **Description** | **Example** |
+|--------------|-----------------|-------------|
+| OAA_ED25519_PRIVATE_B64 | Base64 private signing key | MC4CAQAwBQYDK2VwBCIEIF... |
+| OAA_ED25519_PUBLIC_B64 | Base64 public key | MCowBQYDK2VwAyEA... |
+| OAA_ISSUER | Issuer name | oaa-lab7 |
+| OAA_SIGNING_VERSION | Version | ed25519:v1 |
+| OAA_SIGNING_CREATED | Timestamp | 2025-10-12T00:00:00Z |
+| OAA_VERIFY_PIN_KEYS | Toggle key verification | true |
+| OAA_VERIFY_TS_WINDOW_MIN | Allowed timestamp drift | 10 |
+| OAA_NONCE_REDIS_URL | Redis (optional) | redis://user:pass@host:6379 |
+| LEDGER_URL | Civic Ledger endpoint | https://civic-protocol-core-ledger.onrender.com |
+
+---
+
+**4. Frontend (Next.js)**
+
+```
+cd frontend/reflections-app
+npm install
+export NEXT_PUBLIC_OAA_API_BASE=http://localhost:8000
+npm run dev
 ```
 
-### Code Quality
+Then visit  
+👉 http://localhost:3000  
 
-```bash
-# Format code
-black .
+---
 
-# Lint
-ruff check .
+## 🌐 Deployment (Render)
 
-# Type check
-mypy app
+**API (Web Service)**
 
-# Run tests
-pytest
+| **Setting** | **Value** |
+|-------------|-----------|
+| Root Directory | / |
+| Runtime | Python 3.12 |
+| Build Command | pip install -r requirements.txt |
+| Start Command | uvicorn app.main:app --host 0.0.0.0 --port $PORT |
 
-# All checks
-black . && ruff check . && mypy app && pytest
+**Frontend (Static Site)**
+
+| **Setting** | **Value** |
+|-------------|-----------|
+| Root Directory | frontend/reflections-app |
+| Build Command | npm ci && npm run build && npx next export |
+| Publish Directory | out |
+| Environment Variables | NEXT_PUBLIC_OAA_API_BASE=https://lab7-proof.onrender.com |
+
+---
+
+## 🪄 One-Click Deploy
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+Environment variables:
+
+| Name | Description | Example |
+|------|--------------|----------|
+| `NEXT_PUBLIC_OAA_API_BASE` | URL of your OAA backend | `https://lab7-proof.onrender.com` |
+
+---
+
+## 🧰 Directory Map
+
+```
+lab7-proof/
+├── app/
+│   ├── main.py
+│   ├── crypto/
+│   ├── middleware/
+│   └── routers/
+│       └── oaa/
+│           ├── router.py
+│           ├── verify_history.py
+│           ├── keys_page.py
+│           ├── models.py
+│           ├── policy.py
+│           ├── store.py
+│           └── state.py
+├── templates/
+│   └── oaa_keys.html
+├── frontend/
+│   └── reflections-app/
+│       ├── app/
+│       ├── lib/
+│       ├── prisma/
+│       └── Dockerfile
+└── scripts/
+    ├── rotate_keys.py
+    └── verify_attestation.py
 ```
 
-## 📄 License
+---
 
-This project is part of the Kaizen DVA ecosystem and follows the Civic Protocol Core licensing terms.
+## 🧑‍🏫 Purpose
 
-## 🤝 Contributing
+**OAA (Lab7)** serves as:  
+- A verifiable **Proof of Integrity Authority**  
+- A **digital apprenticeship hub** for STEM learners  
+- A **Kaizen verification gateway** for human-AI collaboration  
+- The **bridge between education, AI agents, and governance**  
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+"Knowledge becomes power when it is verified, shared, and immortalized."
 
-## 📞 Support
+---
 
+## 🪞 Part of the Kaizen DVA Ecosystem
 
-For questions and support, please open an issue in this repository or contact the Kaizen DVA team.
+| **Lab** | **Role** | **Core Function** |
+|---------|----------|-------------------|
+| **Lab4** | Reflections | Personal journaling & memory API |
+| **Lab6** | Citizen Shield | Digital security & identity |
+| **Lab7** | OAA | Attestation & apprenticeship |
+| **GIC Ledger** | Economy | Proof-of-Integrity currency layer |
+
+---
+
+## 🧭 End-to-End Data & Attestation Flow (ASCII)
+
+```
+                ┌─────────────────────────────────────────────────┐
+                │                Users & Devices                  │
+                │   (web, iOS/Android, CLI, game clients)        │
+                └───────────────┬─────────────────────────────────┘
+                                │
+                     (HTTPS JSON / WebSocket)
+                                │
+                                ▼
+ ┌─────────────────────────────────────────────────────────────────────┐
+ │                          Frontend (Next.js)                         │
+ │  Repo: /frontend/reflections-app                                   │
+ │  Pages: /mentor  /verify  /keys  /api/*                            │
+ │  Env: NEXT_PUBLIC_OAA_API_BASE                                     │
+ └───────────────┬───────────────────────────────┬────────────────────┘
+                 │                               │
+                 │ fetch()                       │ fetch()
+                 │                               │
+                 ▼                               ▼
+    ┌─────────────────────┐            ┌────────────────────────┐
+    │  Lab4 (HIVE-PAW)    │            │  Lab7 (OAA, this repo) │
+    │  Reflections API    │            │  FastAPI               │
+    │  https://…/lab4     │            │  https://…/lab7        │
+    └─────────┬───────────┘            └─────────┬──────────────┘
+              │                                   │
+              │                                   │
+              │  reflection/insight               │  attestation/verify
+              │  memory append/summarize          │  filter/sources
+              │                                   │  /oaa/ingest
+              │                                   │  /oaa/verify
+              │                                   │  /oaa/well-known/oaa-keys.json
+              │                                   │
+              │                                   │
+              │                                   ▼
+              │                    ┌────────────────────────────────┐
+              │                    │  Crypto Engine (Ed25519, SHA) │
+              │                    │  Env:                          │
+              │                    │   OAA_ED25519_PRIVATE_B64     │
+              │                    │   OAA_ED25519_PUBLIC_B64      │
+              │                    │   OAA_SIGNING_VERSION         │
+              │                    └───────────────┬───────────────┘
+              │                                    │
+              │                                    │ optional anti-replay
+              │                                    ▼
+              │                     ┌──────────────────────────────┐
+              │                     │ Redis (nonce store)          │
+              │                     │ OAA_NONCE_REDIS_URL          │
+              │                     └───────────────┬──────────────┘
+              │                                     │
+              │                                     │ (if enabled)
+              │                                     │
+              │                                     ▼
+              │                     ┌──────────────────────────────┐
+              │                     │ Civic Ledger (optional)      │
+              │                     │ https://…/ledger             │
+              │                     │  /ledger/attest              │
+              │                     │  /ledger/verify              │
+              │                     └───────────────┬──────────────┘
+              │                                     │
+              │                         anchor hash / receipt
+              │                                     │
+              └─────────────────────────────────────┴──────────────────→
+                                  Attestation receipt (JWS + ledger tx)
+```
+
+**Legend**
+
+- **Lab4** → captures reflections, memories, and signals for learning.
+- **Lab7/OAA** → signs, filters, and verifies claims; exposes public keys at `/.well-known/oaa-keys.json`.
+- **Crypto Engine** → Ed25519 signing + SHA-256 hashing; optional nonce defense via Redis.
+- **Civic Ledger** → optional immutable anchoring of attestation hashes for public audit.
+- **Frontend** → teaching/verification UI; calls Lab4/Lab7 via `NEXT_PUBLIC_OAA_API_BASE`.
+
+**Ports & Processes (Render defaults)**
+
+- **Lab7 API**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Frontend**: `npm run build && npx next export` → served as **Static Site**
+- **Redis (optional)**: Managed addon or external Redis URL
+
+---
+
+## 🪙 License
+
+**Civic Ledger Protocol — Open Attribution License**  
+All derivative works must attribute to *Michael Judan (Kaizen)* and the *Kaizen DVA Ecosystem*.
+
+---
+
+## ✴️ Motto
+
+"We heal as we walk."  
+*— The Founder's Hand*
