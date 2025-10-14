@@ -56,7 +56,7 @@ For CI/CD, add these as GitHub repository secrets:
 - `LAB7_RENDER_API_KEY`
 - `LAB7_BACKEND_SERVICE_ID` 
 - `LAB7_FRONTEND_SERVICE_ID`
-- `LAB7_AUTOLABEL_TOKEN`
+- `LAB7_AUTOLABEL_TOKEN` (GitHub Personal Access Token)
 
 ## 6. GitHub Variables Setup
 

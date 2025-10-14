@@ -28,7 +28,7 @@ import requests
 SHARED_SECRET = os.getenv("SENTINEL_HMAC", "")
 GITHUB_APP_ID = os.getenv("GH_APP_ID", "")
 GITHUB_INSTALL_ID = os.getenv("GH_INSTALL_ID", "")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "your_github_personal_access_token")
 RENDER_SERVICE_ID = os.getenv("RENDER_SERVICE_ID", "")
 RENDER_API_KEY = os.getenv("RENDER_API_KEY", "")
 

@@ -37,7 +37,7 @@ This integration adds a closed-loop learning layer to your Lab7-Proof stack:
 - `LAB7_RENDER_API_KEY` — Render API token (service-scoped if possible)
 - `LAB7_BACKEND_SERVICE_ID` — Render service id for API
 - `LAB7_FRONTEND_SERVICE_ID` — Render service id for web (optional)
-- (optional) `LAB7_AUTOLABEL_TOKEN` — a fine-scoped PAT/GitHub App token to add labels
+- (optional) `LAB7_AUTOLABEL_TOKEN` — a GitHub Personal Access Token to add labels
 
 ## Required GitHub Variables
 
