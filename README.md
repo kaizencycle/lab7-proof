@@ -123,7 +123,6 @@ Add these in Render or your local .env:
 | OAA_SIGNING_CREATED | Timestamp | 2025-10-12T00:00:00Z |
 | OAA_VERIFY_PIN_KEYS | Toggle key verification | true |
 | OAA_VERIFY_TS_WINDOW_MIN | Allowed timestamp drift | 10 |
-| OAA_NONCE_REDIS_URL | Redis (optional) | redis://user:pass@host:6379 |
 | LEDGER_URL | Civic Ledger endpoint | https://civic-protocol-core-ledger.onrender.com |
 
 ---
@@ -326,3 +325,4 @@ All derivative works must attribute to *Michael Judan (Kaizen)* and the *Kaizen 
 "We heal as we walk."  
 
 *— The Founder's Hand*
+
