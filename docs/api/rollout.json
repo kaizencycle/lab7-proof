@@ -1,5 +1,8 @@
 {
+  "ok": true,
+  "version": "v1",
+  "source": "ledger/model_cards\\v1.json",
+  "updated": "2025-10-14T22:41:34.546354Z",
   "mode": "shadow",
-  "traffic_pct": 0,
-  "updated": "2025-10-14T21:36:27.914340Z"
+  "traffic_pct": 0
 }
