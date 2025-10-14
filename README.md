@@ -117,7 +117,7 @@ Add these in Render or your local .env:
 
 | **Variable** | **Description** | **Example** |
 |--------------|-----------------|-------------|
-| OAA_ED25519_PRIVATE_B64 | Base64 private signing key | MC4CAQAwBQYDK2VwBCIEIF... |
+|
 | OAA_ED25519_PUBLIC_B64 | Base64 public key | MCowBQYDK2VwAyEA... |
 | OAA_ISSUER | Issuer name | oaa-lab7 |
 | OAA_SIGNING_VERSION | Version | ed25519:v1 |
