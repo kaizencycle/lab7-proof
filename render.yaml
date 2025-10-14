@@ -7,7 +7,7 @@ envVarGroups:
     envVars:
       # --- REQUIRED: current signing keys (base64 contents of files) ---
       - key: OAA_ED25519_PRIVATE_B64
-        value: "Cdy1h5vVSdBJHZnhffXknY+VTi5XG2kG/ebaGN738wQ="
+        value: "PRIVE_KEY_PLACE"
       - key: OAA_ED25519_PUBLIC_B64
         value: "SFrlLxcgOfW5Uqei+13VFVp/nhOigQkFzY87NllF2bU="
 
