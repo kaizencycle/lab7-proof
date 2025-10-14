@@ -1,5 +1,4 @@
 name: Lab7 CI
-
 on:
   push:
     branches: [ main, master ]
