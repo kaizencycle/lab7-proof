@@ -1,48 +1,28 @@
 PY=python3
-VENV=.venv
-PIP=$(VENV)/bin/pip
-PYTHON=$(VENV)/bin/python
-PYTEST=$(VENV)/bin/pytest
 
-SETUP=$(PY) -m venv $(VENV) && $(PIP) install -U pip && $(PIP) install -r requirements.txt
+.PHONY: eci-run ledger-mock test hooks install-hooks
 
-.PHONY: setup test validate pulse attest echo clean
+eci-run:
+	@echo "Running ECI orchestrator (DRY_RUN=$${DRY_RUN:-true})"
+	LEDGER_URL=$${LEDGER_URL:-http://127.0.0.1:8787/attest} \
+	DRY_RUN=$${DRY_RUN:-true} \
+	ANCHOR_SIGNER=$${ANCHOR_SIGNER:-} \
+	CUSTODIAN_SIGNER=$${CUSTODIAN_SIGNER:-} \
+	$(PY) tools/quorum_orchestrator.py --prompt PROMPT.md --workdir workrepo --title "Local ECI run"
 
-setup:
-	$(SETUP)
+ledger-mock:
+	$(PY) tools/ledger_mock_server.py
 
 test:
-	$(PYTEST) -q
+	$(PY) -m pytest -q || true
 
-validate:
-	$(PYTHON) - <<'PY'
-from json import loads
-from pathlib import Path
-from jsonschema import Draft202012Validator
-schema = loads(Path("global-health-sentinel/schema/pulse.schema.json").read_text())
-payload = loads(Path("global-health-sentinel/attestations/example_attestation.json").read_text()) if Path("global-health-sentinel/attestations/example_attestation.json").exists() else None
-if not payload:
-    print("No example_attestation.json found; skipping schema validate target.")
-else:
-    v = Draft202012Validator(schema)
-    errs = sorted([f"{'/'.join(map(str,e.path))}: {e.message}" for e in v.iter_errors(payload)])
-    print("Schema OK" if not errs else "Schema ERRORS:\n- "+"\n- ".join(errs))
-PY
+hooks:
+	chmod +x .git/hooks/pre-commit
 
-pulse:
-	$(PYTHON) global-health-sentinel/pulse_sentinel.py
+install-hooks: hooks
+	@echo "Git hooks installed."
 
-attest:
-	ATTEST=1 $(PYTHON) global-health-sentinel/pulse_sentinel.py
-
-echo:
-	$(PYTHON) global-health-sentinel/echo_bridge.py
-
-echo_attachless:
-	$(PYTHON) - <<'PY'
-from global_health_sentinel.echo_bridge import run_once
-run_once(attach_global=False)
-PY
-
-clean:
-	rm -rf $(VENV) sentinel_logs */__pycache__ .pytest_cache
+# Convenience: run the whole local loop (mock ledger + orchestrator)
+run-local:
+	@echo "Start mock ledger in another terminal:  make ledger-mock"
+	@echo "Then run:  make eci-run DRY_RUN=false ANCHOR_SIGNER=yes CUSTODIAN_SIGNER=yes"

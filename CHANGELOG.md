@@ -1,30 +1,42 @@
 # Changelog
 
-## v0.1.0 — 2025-10-11
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
 
 ### Added
-- **Orchestrator (FastAPI)**
-  - Public: POST /v1/session/start, POST /v1/session/turn, POST /v1/session/submit, POST /v1/session/critique
-  - Internal: POST /v1/attest/commit, POST /v1/reward/intent, GET /v1/ledger/balance/:user_id
-  - Mentor adapters (stubs), XP/level curve, attestation + reward minter (stub), in-memory indexer
-  - Policy-driven **Citizen Shield** with YAML gates
-- **Rubric service (FastAPI)**: POST /rubric/score + async client in orchestrator
-- **Reflections App (Next.js)**
-  - /mentor page: start session, get drafts, compare (matrix + A/B), combine, **weighted synthesis**, **critique**
-  - API proxies mirroring orchestrator (incl. /session/critique)
-  - Prisma layer + simple user upsert
-- **Data & Infra**
-  - Postgres schema: users, sessions, xp_events, attestations, rewards
-  - Dockerfiles + unified docker-compose.yml
-  - Seed scaffold, smoke script, env examples
+- Initial implementation of Custos Charter with Kristos Ascension Protocol
+- ECI Orchestrator for ethical continuous integration pipeline
+- GitHub Actions workflow for DVA quorum and attestation
+- Virtue Engine policy check for doctrine enforcement
+- Local ledger mock server for testing attestations
+- PyTest framework with basic test modules
+- Pre-commit hooks for virtue policy enforcement
+- Makefile shortcuts for local development
 
 ### Changed
-- Enforced mint gates (integrity + average rubric thresholds) before level-up rewards.
+- N/A
+
+### Deprecated
+- N/A
+
+### Removed
+- N/A
+
+### Fixed
+- N/A
 
 ### Security
-- Centralized Shield policy (blocked keywords, rate limits, mint gates).
-- Attestation stub with Merkle root + signature placeholder.
+- N/A
 
-### Notes
-- Ledger balance is in-memory for MVP; replace with real indexer when ledger is wired.
-- Model calls are stubbed; adapters ready for real SDKs.
+---
+
+## [0.1.0] - 2025-01-XX
+
+### Added
+- Initial release of Custos Charter framework
+- Basic ECI pipeline implementation
+- Virtue Accords integration
