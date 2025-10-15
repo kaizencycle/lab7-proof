@@ -2,19 +2,37 @@
 ### A Cryptographic Verification Engine for Digital Integrity  
 > _"Proof of Integrity is the new Proof of Work."_
 
----
+```
+┌───────────────────────────────────────────┐
+│ OAA CENTRAL HUB — Plan • Act • Learn • Seal │
+└───────────────────────────────────────────┘
+```
 
+---
+---
 ## 🌟 Overview
 
 **Lab7 (OAA)** is an **Open Attestation Authority** that provides cryptographic verification and digital integrity services. It bridges **education**, **AI mentorship**, and **verifiable credentials** through secure attestation endpoints and learning dashboards.
 
-## 🚀 Key Features
+### 🧠 OAA Central Hub
+
+The **OAA Central Hub** serves as the central nervous system, orchestrating all labs and tools through a unified **Plan • Act • Learn • Seal** architecture:
+
+- **🧠 Jade (Planner)** — Intelligent decision making and goal planning
+- **⚡ Zeus (Executor)** — Policy-enforced tool execution with circuit breakers  
+- **🛡️ Eve (Human Gate)** — Human approval and safety controls
+- **📊 Hermes (I/O)** — Status monitoring and observability
+- **🔒 Sealing** — Immutable audit trails and integrity verificationrds.## 🚀 Key Features
 
 - 🔐 **Cryptographic Verification** — Ed25519 digital signatures for integrity proofs
 - 🧩 **FastAPI Backend** — High-performance API for attestation services
 - 🎓 **Learning Integration** — Educational tools and mentorship platforms
 - 🌐 **Cloud Deployment** — Ready for Render, AWS, or other cloud providers
 - 📊 **Dashboard Interface** — User-friendly verification and management tools
+- 🧠 **Central Hub** — Unified orchestration of all labs and tools
+- ⚡ **Circuit Breakers** — Automatic failure protection and recovery
+- 🛡️ **Policy Enforcement** — Security controls and access management
+- 📈 **Observability** — Real-time monitoring and performance trackingent tools
 
 <!-- PAL BADGES START -->
 ![PAL Rollout](docs/badges/pal_rollout.svg) ![PAL Safety](docs/badges/pal_safety.svg)
@@ -24,9 +42,7 @@
 
 _This section will be auto-populated by the dashboard workflow._
 
-<!-- PAL DASHBOARD END -->
-
-## 🏗️ Architecture
+<!-- PAL DASHBOAR## 🏗️ Architecture
 
 OAA is built with modern, secure technologies:
 
@@ -34,7 +50,10 @@ OAA is built with modern, secure technologies:
 - ⚙️ **Ed25519 Cryptography** — Secure digital signatures using public/private key pairs
 - 🧭 **Next.js Frontend** — Modern React-based dashboard and verification interface
 - 🔗 **Cloud-Ready** — Designed for easy deployment on Render, AWS, or other platforms
-- 🧠 **Extensible Design** — Modular architecture for custom integrations  
+- 🧠 **Extensible Design** — Modular architecture for custom integrations
+- 🎯 **Central Hub** — TypeScript-based orchestration layer with Express.js
+- 🔄 **Circuit Breakers** — Automatic failure detection and service protection
+- 📊 **Observability** — Comprehensive monitoring and logging systemcustom integrations  
 
 ---
 
