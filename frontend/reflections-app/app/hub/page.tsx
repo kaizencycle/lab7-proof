@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import SubjectList from "../../components/SubjectList";
+import ThemeToggle from "../../components/ThemeToggle";
 
 type Msg = { role: "user" | "assistant" | "system"; content: string; meta?: any };
 type HubReply = { role: "assistant"; content: string; sources?: { mentor: string; preview: string }[]; session_id?: string };
@@ -16,6 +18,7 @@ export default function HubPage() {
   const [model, setModel] = useState<string>("ensemble");
   const [mentors, setMentors] = useState<string[]>([...DEFAULT_MENTORS]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
 
@@ -74,15 +77,23 @@ export default function HubPage() {
     setMentors((cur) => (cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]));
   }
 
+  function pickSubjectPrompt(text: string) {
+    // prefill + send
+    setInput(text);
+    setTimeout(() => send(), 10);
+  }
+
+  const t = themeVars(theme);
   return (
-    <div style={wrap}>
+    <div style={{ ...wrap, background: t.shellBg }}>
       {/* Sidebar */}
-      <aside style={side}>
+      <aside style={{ ...side, background: t.sideBg, color: t.sideFg, borderRight: `1px solid ${t.sideBorder}` }}>
         <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 12 }}>OAA Central Hub</div>
+        <SubjectList onPick={pickSubjectPrompt} />
         <div style={{ opacity: 0.7, marginBottom: 16 }}>Models</div>
         <div style={{ display: "grid", gap: 6 }}>
           {["ensemble", "gemini", "claude", "deepseek", "perplexity"].map((m) => (
-            <button key={m} onClick={() => setModel(m)} style={chip(model === m)}>{m}</button>
+            <button key={m} onClick={() => setModel(m)} style={chip(model === m, t)}>{m}</button>
           ))}
         </div>
         <div style={{ height: 1, background: "#eee", margin: "16px 0" }} />
@@ -100,30 +111,33 @@ export default function HubPage() {
           ))}
         </div>
         <div style={{ height: 1, background: "#eee", margin: "16px 0" }} />
-        <div style={{ fontSize: 12, opacity: 0.7 }}>Hub: {HUB_TITLE}</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          <div style={{ fontSize: 12, opacity: 0.8 }}>Hub: {HUB_TITLE}</div>
+          <ThemeToggle onChange={setTheme} />
+        </div>
       </aside>
 
       {/* Main */}
-      <main style={main}>
-        <header style={topbar}>
+      <main style={{ ...main, background: t.mainBg, color: t.mainFg }}>
+        <header style={{ ...topbar, borderBottom: `1px solid ${t.barBorder}`, background: t.barBg, color: t.barFg }}>
           <div style={{ fontWeight: 700 }}>{HUB_TITLE}</div>
           <div style={{ fontSize: 12, opacity: 0.7 }}>Mode: {model}</div>
         </header>
 
-        <div style={chat}>
+        <div style={{ ...chat, background: t.chatBg }}>
           {messages.map((m, i) => (
-            <div key={i} style={bubble(m.role)}>
+            <div key={i} style={bubble(m.role, t)}>
               <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{m.role}</div>
-              <pre style={pre}>{m.content}</pre>
+              <pre style={pre(t)}>{m.content}</pre>
             </div>
           ))}
-          {sending && <div style={{ ...bubble("assistant"), opacity: 0.6 }}>…</div>}
+          {sending && <div style={{ ...bubble("assistant", t), opacity: 0.6 }}>…</div>}
           <div ref={bottomRef} />
         </div>
 
-        <div style={composer}>
+        <div style={{ ...composer, background: t.mainBg, borderTop: `1px solid ${t.barBorder}` }}>
           <textarea
-            style={ta}
+            style={ta(t)}
             rows={3}
             placeholder="Ask OAA… (Shift+Enter = newline)"
             value={input}
@@ -132,7 +146,7 @@ export default function HubPage() {
               if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
             }}
           />
-          <button style={sendBtn} disabled={!input.trim() || sending} onClick={send}>
+          <button style={sendBtn(t)} disabled={!input.trim() || sending} onClick={send}>
             {sending ? "Sending…" : "Send"}
           </button>
         </div>
@@ -142,42 +156,67 @@ export default function HubPage() {
 }
 
 /* ---------- styles ---------- */
-const wrap: React.CSSProperties = { display: "grid", gridTemplateColumns: "260px 1fr", height: "100vh", background: "#0f172a" };
-const side: React.CSSProperties = { background: "#0b1225", color: "white", padding: 16, borderRight: "1px solid #1e293b", overflow: "auto" };
-const main: React.CSSProperties = { display: "grid", gridTemplateRows: "56px 1fr auto", background: "white" };
-const topbar: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", borderBottom: "1px solid #e5e7eb" };
-const chat: React.CSSProperties = { padding: 16, overflow: "auto", background: "#f8fafc" };
-const composer: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 120px", gap: 8, padding: 12, borderTop: "1px solid #e5e7eb", background: "white" };
-const ta: React.CSSProperties = { border: "1px solid #d1d5db", borderRadius: 10, padding: 12, fontSize: 14, background: "white", resize: "vertical" };
-const sendBtn: React.CSSProperties = { border: "1px solid #111827", background: "#111827", color: "white", borderRadius: 10, fontWeight: 700, cursor: "pointer" };
-const bubble = (role: "user" | "assistant" | "system"): React.CSSProperties => ({
-  background: role === "user"
-    ? "#f9fafb"
-    : role === "assistant"
-    ? "#e0e7ff"
-    : "#fef3c7",
-  border: "1px solid #cbd5e1",
+const wrap: React.CSSProperties = { display: "grid", gridTemplateColumns: "280px 1fr", height: "100vh" };
+const side: React.CSSProperties = { padding: 16, overflow: "auto" };
+const main: React.CSSProperties = { display: "grid", gridTemplateRows: "56px 1fr auto" };
+const topbar: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px" };
+const chat: React.CSSProperties = { padding: 16, overflow: "auto" };
+const composer: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 120px", gap: 8, padding: 12 };
+const ta = (t: ThemeVars): React.CSSProperties => ({ border: `1px solid ${t.inputBorder}`, borderRadius: 10, padding: 12, fontSize: 14, background: t.inputBg, color: t.inputFg, resize: "vertical" });
+const sendBtn = (t: ThemeVars): React.CSSProperties => ({ border: `1px solid ${t.btnBorder}`, background: t.btnBg, color: t.btnFg, borderRadius: 10, fontWeight: 700, cursor: "pointer" });
+const bubble = (role: "user" | "assistant" | "system", t: ThemeVars): React.CSSProperties => ({
+  background: role === "user" ? t.bubbleUserBg : role === "assistant" ? t.bubbleAssistantBg : t.bubbleSystemBg,
+  border: `1px solid ${t.bubbleBorder}`,
   borderRadius: 10,
   padding: "10px 12px",
   marginBottom: 10,
-  color: "#0f172a",
+  color: t.bubbleFg,
   lineHeight: 1.5,
 });
-const pre: React.CSSProperties = {
+const pre = (t: ThemeVars): React.CSSProperties => ({
   whiteSpace: "pre-wrap",
   margin: 0,
   fontFamily: "Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif",
   fontSize: 14,
-  color: "#111827",
-};
-const chip = (active: boolean): React.CSSProperties => ({
+  color: t.textFg,
+});
+const chip = (active: boolean, t: ThemeVars): React.CSSProperties => ({
   textAlign: "left",
-  border: "1px solid #334155",
-  background: active ? "#1e293b" : "#0f172a",
-  color: "white",
+  border: `1px solid ${t.chipBorder}`,
+  background: active ? t.chipActiveBg : t.chipBg,
+  color: t.chipFg,
   padding: "8px 10px",
   borderRadius: 8,
   cursor: "pointer",
   textTransform: "capitalize"
 });
 const mentorRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, fontSize: 14 };
+
+/* ---------- theme ---------- */
+type ThemeVars = {
+  shellBg: string; sideBg: string; sideFg: string; sideBorder: string;
+  mainBg: string; mainFg: string; barBg: string; barFg: string; barBorder: string; chatBg: string;
+  inputBg: string; inputFg: string; inputBorder: string; btnBg: string; btnFg: string; btnBorder: string;
+  bubbleUserBg: string; bubbleAssistantBg: string; bubbleSystemBg: string; bubbleBorder: string; bubbleFg: string; textFg: string;
+  chipBg: string; chipActiveBg: string; chipBorder: string; chipFg: string;
+};
+function themeVars(mode: "light" | "dark"): ThemeVars {
+  if (mode === "dark") {
+    return {
+      shellBg: "#0b1225", sideBg: "#0b1225", sideFg: "white", sideBorder: "#1e293b",
+      mainBg: "#0f172a", mainFg: "white", barBg: "#0b1225", barFg: "white", barBorder: "#1e293b", chatBg: "#0f172a",
+      inputBg: "#0f172a", inputFg: "white", inputBorder: "#334155",
+      btnBg: "#1e293b", btnFg: "white", btnBorder: "#334155",
+      bubbleUserBg: "#111827", bubbleAssistantBg: "#1f2937", bubbleSystemBg: "#1e293b", bubbleBorder: "#334155", bubbleFg: "white", textFg: "white",
+      chipBg: "#0f172a", chipActiveBg: "#1e293b", chipBorder: "#334155", chipFg: "white",
+    };
+  }
+  return {
+    shellBg: "#0f172a", sideBg: "#0b1225", sideFg: "white", sideBorder: "#1e293b",
+    mainBg: "white", mainFg: "#0f172a", barBg: "white", barFg: "#0f172a", barBorder: "#e5e7eb", chatBg: "#f8fafc",
+    inputBg: "white", inputFg: "#0f172a", inputBorder: "#d1d5db",
+    btnBg: "#111827", btnFg: "white", btnBorder: "#111827",
+    bubbleUserBg: "#f9fafb", bubbleAssistantBg: "#e0e7ff", bubbleSystemBg: "#fef3c7", bubbleBorder: "#cbd5e1", bubbleFg: "#0f172a", textFg: "#111827",
+    chipBg: "#0f172a", chipActiveBg: "#1e293b", chipBorder: "#334155", chipFg: "white",
+  };
+}
