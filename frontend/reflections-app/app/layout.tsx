@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import NavBar from '../components/NavBar'
 
 export const metadata: Metadata = {
   title: 'OAA Console - Open Attestation Authority',
