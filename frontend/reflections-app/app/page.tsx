@@ -1,7 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from "next/link";
+import { useState, useEffect, useRef } from 'react';
+import { Send, Paperclip, Bot, User, Settings, Zap, Shield, FileText } from 'lucide-react';
+
+interface Message {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant' | 'system';
+  timestamp: Date;
+  type?: 'text' | 'attestation' | 'status' | 'error';
+  metadata?: any;
+}
 
 interface OAAStatus {
   status: 'online' | 'offline' | 'loading';
@@ -14,12 +23,23 @@ interface OAAStatus {
 }
 
 export default function Home() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      content: 'Hello! I\'m your OAA Assistant. I can help you with attestations, verify credentials, check system status, and manage your Open Attestation Authority. How can I assist you today?',
+      role: 'assistant',
+      timestamp: new Date(),
+      type: 'text'
+    }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [status, setStatus] = useState<OAAStatus>({
     status: 'loading',
     services: []
   });
-
-  const [activeTab, setActiveTab] = useState<'overview' | 'models' | 'console' | 'logs'>('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Simulate loading OAA status
@@ -37,265 +57,315 @@ export default function Home() {
     }, 1500);
   }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'running': return 'text-green-400';
-      case 'stopped': return 'text-red-400';
-      case 'error': return 'text-yellow-400';
-      default: return 'text-gray-400';
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: inputValue,
+      role: 'user',
+      timestamp: new Date(),
+      type: 'text'
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsTyping(true);
+
+    // Simulate AI response
+    setTimeout(() => {
+      const response = generateResponse(inputValue);
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: response.content,
+        role: 'assistant',
+        timestamp: new Date(),
+        type: response.type,
+        metadata: response.metadata
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setIsTyping(false);
+    }, 1000 + Math.random() * 2000);
+  };
+
+  const generateResponse = (input: string): { content: string; type: 'text' | 'attestation' | 'status' | 'error'; metadata?: any } => {
+    const lowerInput = input.toLowerCase();
+
+    if (lowerInput.includes('status') || lowerInput.includes('health')) {
+      return {
+        content: 'Here\'s the current system status:',
+        type: 'status',
+        metadata: status
+      };
+    }
+
+    if (lowerInput.includes('attest') || lowerInput.includes('verify')) {
+      return {
+        content: 'I can help you create and verify attestations. Please provide the data you want to attest, and I\'ll process it through the OAA Core engine.',
+        type: 'attestation',
+        metadata: { action: 'create_attestation' }
+      };
+    }
+
+    if (lowerInput.includes('help') || lowerInput.includes('commands')) {
+      return {
+        content: 'Here are the available commands:\n\n• **Status** - Check system health and service status\n• **Attest** - Create or verify digital attestations\n• **Keys** - View public keys for verification\n• **Logs** - Access system logs and monitoring\n• **PAL** - Policy as Learning operations\n• **Zeus** - Quality gate management\n\nYou can also ask me about specific services or request detailed information about any OAA functionality.',
+        type: 'text'
+      };
+    }
+
+    if (lowerInput.includes('pal') || lowerInput.includes('policy')) {
+      return {
+        content: 'The PAL (Policy as Learning) Engine is currently running with adaptive learning policies. It\'s monitoring canary rollouts and maintaining safety gates. Would you like me to show you the current policy status or help with a specific PAL operation?',
+        type: 'text'
+      };
+    }
+
+    if (lowerInput.includes('zeus') || lowerInput.includes('gate')) {
+      return {
+        content: 'Zeus Gateway is active and monitoring quality gates. All services have passed the current safety checks. The system is ready for production traffic.',
+        type: 'text'
+      };
+    }
+
+    // Default response
+    return {
+      content: 'I understand you\'re asking about: "' + input + '". I can help you with OAA operations, attestations, system monitoring, and policy management. Could you be more specific about what you\'d like to do?',
+      type: 'text'
+    };
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'running': return '●';
-      case 'stopped': return '●';
-      case 'error': return '●';
-      default: return '○';
-    }
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const renderMessage = (message: Message) => {
+    const isUser = message.role === 'user';
+    
+    return (
+      <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+        <div className={`flex max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start space-x-3`}>
+          {/* Avatar */}
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+            isUser 
+              ? 'bg-blue-600' 
+              : message.role === 'system' 
+                ? 'bg-gray-600' 
+                : 'bg-gradient-to-br from-purple-500 to-blue-600'
+          }`}>
+            {isUser ? <User size={16} /> : <Bot size={16} />}
+          </div>
+
+          {/* Message Content */}
+          <div className={`rounded-2xl px-4 py-3 message-bubble message-enter ${
+            isUser 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-800 text-gray-100 border border-gray-700'
+          }`}>
+            <div className="whitespace-pre-wrap">{message.content}</div>
+            <div className={`text-xs mt-2 ${
+              isUser ? 'text-blue-100' : 'text-gray-400'
+            }`}>
+              {formatTime(message.timestamp)}
+            </div>
+
+            {/* Special message types */}
+            {message.type === 'status' && message.metadata && (
+              <div className="mt-3 p-3 bg-gray-700 rounded-lg">
+                <div className="text-sm font-semibold mb-2">System Status</div>
+                <div className="space-y-1 text-xs">
+                  {message.metadata.services?.map((service: any, index: number) => (
+                    <div key={index} className="flex justify-between">
+                      <span>{service.name}</span>
+                      <span className={service.status === 'running' ? 'text-green-400' : 'text-red-400'}>
+                        {service.status} (v{service.version})
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {message.type === 'attestation' && (
+              <div className="mt-3 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                <div className="text-sm font-semibold mb-2 flex items-center">
+                  <Shield size={16} className="mr-2" />
+                  Attestation Ready
+                </div>
+                <div className="text-xs text-gray-300">
+                  Provide your data and I'll create a cryptographically signed attestation.
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <header className="border-b border-gray-700 bg-gray-800">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-900 text-white flex">
+      {/* Sidebar */}
+      {sidebarOpen && (
+        <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+          {/* Sidebar Header */}
+          <div className="p-4 border-b border-gray-700">
+            <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">OAA</span>
               </div>
               <div>
-                <h1 className="text-xl font-semibold">Open Attestation Authority</h1>
-                <p className="text-sm text-gray-400">STEM Apprenticeship Engine</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${status.status === 'online' ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                <span className="text-sm text-gray-300">
-                  {status.status === 'loading' ? 'Loading...' : status.status === 'online' ? 'Online' : 'Offline'}
-                </span>
+                <h2 className="font-semibold">OAA Assistant</h2>
+                <p className="text-xs text-gray-400">Open Attestation Authority</p>
               </div>
             </div>
           </div>
-        </div>
-      </header>
 
-      {/* Navigation Tabs */}
-      <nav className="border-b border-gray-700 bg-gray-800">
-        <div className="px-6">
-          <div className="flex space-x-8">
-            {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'models', label: 'Models' },
-              { id: 'console', label: 'Console' },
-              { id: 'logs', label: 'Logs' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300'
-                }`}
+          {/* Quick Actions */}
+          <div className="p-4 border-b border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-300 mb-3">Quick Actions</h3>
+            <div className="space-y-2">
+              <button 
+                onClick={() => setInputValue('Check system status')}
+                className="w-full text-left p-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center space-x-2"
               >
-                {tab.label}
+                <Zap size={16} />
+                <span>System Status</span>
               </button>
-            ))}
+              <button 
+                onClick={() => setInputValue('Create attestation')}
+                className="w-full text-left p-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center space-x-2"
+              >
+                <Shield size={16} />
+                <span>Create Attestation</span>
+              </button>
+              <button 
+                onClick={() => setInputValue('View public keys')}
+                className="w-full text-left p-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center space-x-2"
+              >
+                <FileText size={16} />
+                <span>Public Keys</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Services Status */}
+          <div className="p-4 flex-1">
+            <h3 className="text-sm font-semibold text-gray-300 mb-3">Services</h3>
+            <div className="space-y-2">
+              {status.services.map((service, index) => (
+                <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-gray-700/50">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      service.status === 'running' ? 'bg-green-400' : 'bg-red-400'
+                    }`}></div>
+                    <span className="text-sm">{service.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-400">v{service.version}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Settings */}
+          <div className="p-4 border-t border-gray-700">
+            <button className="w-full text-left p-2 rounded-lg hover:bg-gray-700 transition-colors text-sm flex items-center space-x-2">
+              <Settings size={16} />
+              <span>Settings</span>
+            </button>
           </div>
         </div>
-      </nav>
+      )}
 
-      {/* Main Content */}
-      <main className="p-6">
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Status Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">System Status</h3>
-                    <p className="text-2xl font-bold text-green-400 mt-2">Healthy</p>
-                  </div>
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <span className="text-green-400 text-2xl">✓</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Active Services</h3>
-                    <p className="text-2xl font-bold text-blue-400 mt-2">{status.services.length}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                    <span className="text-blue-400 text-2xl">⚙</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Attestations</h3>
-                    <p className="text-2xl font-bold text-purple-400 mt-2">1,247</p>
-                  </div>
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                    <span className="text-purple-400 text-2xl">🔐</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Services List */}
-            <div className="bg-gray-800 rounded-lg border border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-700">
-                <h3 className="text-lg font-semibold text-white">Services</h3>
-              </div>
-              <div className="divide-y divide-gray-700">
-                {status.services.map((service, index) => (
-                  <div key={index} className="px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <span className={`text-lg ${getStatusColor(service.status)}`}>
-                        {getStatusIcon(service.status)}
-                      </span>
-                      <div>
-                        <h4 className="font-medium text-white">{service.name}</h4>
-                        <p className="text-sm text-gray-400">v{service.version}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-400">Uptime: {service.uptime}</p>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        service.status === 'running' 
-                          ? 'bg-green-500/20 text-green-400' 
-                          : 'bg-red-500/20 text-red-400'
-                      }`}>
-                        {service.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Chat Header */}
+        <div className="p-4 border-b border-gray-700 bg-gray-800 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <Settings size={20} />
+            </button>
+            <div>
+              <h1 className="font-semibold">OAA Assistant</h1>
+              <p className="text-sm text-gray-400">
+                {status.status === 'online' ? 'Online' : 'Connecting...'}
+              </p>
             </div>
           </div>
-        )}
-
-        {activeTab === 'models' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* OAA Core Model */}
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">OAA Core</h3>
-                    <p className="text-sm text-gray-400">Attestation Engine</p>
-                  </div>
-                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">v1.2.3</span>
-                </div>
-                <p className="text-gray-300 text-sm mb-4">
-                  Cryptographic verification and digital integrity services for educational credentials.
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-green-400 text-sm">● Running</span>
-                  <button className="text-blue-400 hover:text-blue-300 text-sm">Configure</button>
-                </div>
-              </div>
-
-              {/* PAL Engine Model */}
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-purple-500 transition-colors">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">PAL Engine</h3>
-                    <p className="text-sm text-gray-400">Policy as Learning</p>
-                  </div>
-                  <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full">v2.1.0</span>
-                </div>
-                <p className="text-gray-300 text-sm mb-4">
-                  Adaptive learning policies with canary rollouts and safety gates.
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-green-400 text-sm">● Running</span>
-                  <button className="text-purple-400 hover:text-purple-300 text-sm">Configure</button>
-                </div>
-              </div>
-
-              {/* Zeus Gateway Model */}
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-yellow-500 transition-colors">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Zeus Gateway</h3>
-                    <p className="text-sm text-gray-400">Quality Gates</p>
-                  </div>
-                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full">v1.5.2</span>
-                </div>
-                <p className="text-gray-300 text-sm mb-4">
-                  Quality gates and safety checks for model promotion workflows.
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-green-400 text-sm">● Running</span>
-                  <button className="text-yellow-400 hover:text-yellow-300 text-sm">Configure</button>
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${
+              status.status === 'online' ? 'bg-green-400' : 'bg-yellow-400'
+            }`}></div>
+            <span className="text-sm text-gray-400">
+              {status.status === 'online' ? 'All systems operational' : 'Initializing...'}
+            </span>
           </div>
-        )}
+        </div>
 
-        {activeTab === 'console' && (
-          <div className="bg-gray-800 rounded-lg border border-gray-700">
-            <div className="px-6 py-4 border-b border-gray-700">
-              <h3 className="text-lg font-semibold text-white">OAA Console</h3>
-            </div>
-            <div className="p-6">
-              <div className="bg-black rounded-lg p-4 font-mono text-sm">
-                <div className="text-green-400">$ oaa status</div>
-                <div className="text-white mt-2">
-                  <div>OAA Core: ✓ Running (v1.2.3)</div>
-                  <div>PAL Engine: ✓ Running (v2.1.0)</div>
-                  <div>Zeus Gateway: ✓ Running (v1.5.2)</div>
-                  <div>Echo Bridge: ✓ Running (v1.0.8)</div>
-                  <div>Health Sentinel: ✓ Running (v3.2.1)</div>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll">
+          {messages.map(renderMessage)}
+          
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                  <Bot size={16} />
                 </div>
-                <div className="text-green-400 mt-4">$ oaa attest --help</div>
-                <div className="text-white mt-2">
-                  <div>Usage: oaa attest [options] &lt;data&gt;</div>
-                  <div>Options:</div>
-                  <div>  --verify    Verify attestation</div>
-                  <div>  --keys      Show public keys</div>
-                  <div>  --status    Show system status</div>
+                <div className="bg-gray-800 rounded-2xl px-4 py-3 border border-gray-700">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                  </div>
                 </div>
-                <div className="text-green-400 mt-4">$ _</div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-        {activeTab === 'logs' && (
-          <div className="bg-gray-800 rounded-lg border border-gray-700">
-            <div className="px-6 py-4 border-b border-gray-700">
-              <h3 className="text-lg font-semibold text-white">System Logs</h3>
+        {/* Input Area */}
+        <div className="p-4 border-t border-gray-700 bg-gray-800">
+          <div className="flex items-end space-x-3">
+            <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+              <Paperclip size={20} />
+            </button>
+            <div className="flex-1 relative">
+              <textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me about attestations, system status, or OAA operations..."
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pr-12 resize-none focus:outline-none focus:border-blue-500 text-white placeholder-gray-400 input-focus"
+                rows={1}
+                style={{ minHeight: '48px', maxHeight: '120px' }}
+              />
             </div>
-            <div className="p-6">
-              <div className="bg-black rounded-lg p-4 font-mono text-sm max-h-96 overflow-y-auto">
-                <div className="text-gray-500">[2025-01-14 22:15:32] INFO: OAA Core started successfully</div>
-                <div className="text-gray-500">[2025-01-14 22:15:33] INFO: PAL Engine initialized with v2.1.0</div>
-                <div className="text-gray-500">[2025-01-14 22:15:34] INFO: Zeus Gateway loaded quality gates</div>
-                <div className="text-gray-500">[2025-01-14 22:15:35] INFO: Echo Bridge connected to sentinel</div>
-                <div className="text-gray-500">[2025-01-14 22:15:36] INFO: Health Sentinel monitoring active</div>
-                <div className="text-blue-400">[2025-01-14 22:16:01] INFO: Attestation request received</div>
-                <div className="text-green-400">[2025-01-14 22:16:02] SUCCESS: Attestation verified and signed</div>
-                <div className="text-blue-400">[2025-01-14 22:16:15] INFO: PAL evaluation completed</div>
-                <div className="text-yellow-400">[2025-01-14 22:16:16] WARN: Canary traffic at 25%</div>
-                <div className="text-green-400">[2025-01-14 22:16:30] SUCCESS: Zeus gate passed - ready for promotion</div>
-              </div>
-            </div>
+            <button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isTyping}
+              className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors btn-hover"
+            >
+              <Send size={20} />
+            </button>
           </div>
-        )}
-    </main>
+        </div>
+      </div>
     </div>
   );
 }
