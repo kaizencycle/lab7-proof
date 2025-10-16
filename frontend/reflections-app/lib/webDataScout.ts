@@ -53,6 +53,13 @@ const DEFAULT_CONFIG: Required<ScoutConfig> = {
   enablePiiRedaction: true,
   enableLayoutDriftDetection: true,
   fallbackEndpoint: '',
+  opsGuardConfig: {
+    piiThreshold: 0.8,
+    safetyThreshold: 0.7,
+    enablePiiDetection: true,
+    enableContentSafety: true,
+    enablePolicyEvaluation: true,
+  },
 };
 
 // Global cache interface (can be replaced with Redis, etc.)
@@ -119,7 +126,13 @@ import { processWithOpsGuard, type OpsGuardConfig } from './opsGuard';
 /**
  * Enhanced PII redaction using Ops Guard integration
  */
-async function redactPii(data: Record<string, unknown>, sourceUrl: string, config: OpsGuardConfig = {}): Promise<Record<string, unknown>> {
+async function redactPii(data: Record<string, unknown>, sourceUrl: string, config: OpsGuardConfig = {
+  enablePiiDetection: true,
+  enableContentSafety: true,
+  enablePolicyEvaluation: true,
+  piiThreshold: 0.8,
+  safetyThreshold: 0.7,
+}): Promise<Record<string, unknown>> {
   try {
     const result = await processWithOpsGuard(data, sourceUrl, config);
     
@@ -391,5 +404,5 @@ export function getCacheStats(): { size: number; keys: string[] } {
 }
 
 // Export types for external use
-export type { ScoutConfig, CacheInterface };
+export type { CacheInterface };
 export type { OpsGuardConfig } from './opsGuard';

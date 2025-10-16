@@ -80,16 +80,16 @@ export function ApiLessonExample() {
               </h3>
               <div className="space-y-2">
                 <div>
-                  <span className="font-medium">Title:</span> {data.title}
+                  <span className="font-medium">Title:</span> {String(data.title || '')}
                 </div>
                 <div>
-                  <span className="font-medium">User ID:</span> {data.userId}
+                  <span className="font-medium">User ID:</span> {String(data.userId || '')}
                 </div>
                 <div>
-                  <span className="font-medium">Post ID:</span> {data.id}
+                  <span className="font-medium">Post ID:</span> {String(data.id || '')}
                 </div>
                 <div>
-                  <span className="font-medium">Body:</span> {data.body}
+                  <span className="font-medium">Body:</span> {String(data.body || '')}
                 </div>
               </div>
               <div className="mt-3 text-sm text-blue-700">
@@ -157,13 +157,13 @@ export function WebScrapingLessonExample() {
               </h3>
               <div className="space-y-2">
                 <div>
-                  <span className="font-medium">Site Title:</span> {data.title}
+                  <span className="font-medium">Site Title:</span> {String(data.title || '')}
                 </div>
                 <div>
-                  <span className="font-medium">Stories Count:</span> {Array.isArray(data.stories) ? data.stories.length : 'N/A'}
+                  <span className="font-medium">Stories Count:</span> {Array.isArray(data.stories) ? String(data.stories.length) : 'N/A'}
                 </div>
                 <div>
-                  <span className="font-medium">Last Updated:</span> {data.last_updated || 'Unknown'}
+                  <span className="font-medium">Last Updated:</span> {String(data.last_updated || 'Unknown')}
                 </div>
               </div>
               <div className="mt-3 text-sm text-green-700">
@@ -224,7 +224,7 @@ export function CivicDataLessonExample() {
         {/* Civic data example */}
         <OaaCivicDataCard
           url="https://data.cityofchicago.org/api/views/example"
-          children={(data, meta) => (
+          children={(data: any, meta: any) => (
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 my-4">
               <h3 className="text-lg font-semibold text-purple-900 mb-2">
                 Live Civic Data

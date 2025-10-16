@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       selector: field.selector,
       required: field.required || false,
       type: field.type || 'string',
-      transform: field.transform ? new Function('value', `return ${field.transform}`) : undefined,
+      transform: field.transform ? (new Function('value', `return ${field.transform}`) as (value: any) => any) : undefined,
     }));
 
     const result = await extract(url, schema, config || {});

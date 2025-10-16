@@ -214,7 +214,8 @@ export function RealTimeStatusMonitor() {
         results.forEach((result, index) => {
           if (result.ok && result.data?.incidents) {
             const incidents = result.data.incidents;
-            incidents.forEach((incident: any) => {
+            if (Array.isArray(incidents)) {
+              incidents.forEach((incident: any) => {
               newAlerts.push({
                 id: `${index}-${incident.id || Date.now()}`,
                 service: result.meta.url,
@@ -223,6 +224,7 @@ export function RealTimeStatusMonitor() {
                 severity: 'warning'
               });
             });
+            }
           }
         });
 
@@ -303,8 +305,8 @@ export function EchoBridgeIntegration() {
           // Send to Echo Bridge Sentinel
           const sentinelPayload = {
             service: 'render',
-            status: result.data.status,
-            incidents: result.data.incidents || [],
+            status: result.data?.status || 'unknown',
+            incidents: result.data?.incidents || [],
             timestamp: new Date().toISOString(),
             source: 'web-data-scout',
             metadata: {

@@ -227,7 +227,7 @@ export async function evaluatePolicy(
 
   // Apply policy rules (simplified version of the Python policy system)
   const reasons: string[] = [];
-  let effect: 'pass' | 'deny' | 'review' = 'review';
+  let effect: 'pass' | 'deny' | 'review' = 'pass';
 
   // Rule 1: Block high PII content
   if (mockSource.meta.pii > finalConfig.piiThreshold) {

@@ -206,16 +206,16 @@ export default function ScoutTestPage() {
                 { name: 'userId', type: 'number' }
               ]}
               refreshInterval={300}
-              children={(data, meta) => (
+              children={(data: any, meta: any) => (
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
                   <h4 className="text-lg font-semibold text-blue-900 mb-2">
-                    {data.title}
+                    {String(data.title || '')}
                   </h4>
                   <p className="text-blue-800 text-sm mb-3">
-                    {data.body}
+                    {String(data.body || '')}
                   </p>
                   <div className="flex justify-between items-center text-xs text-blue-600">
-                    <span>User ID: {data.userId}</span>
+                    <span>User ID: {String(data.userId || '')}</span>
                     <span>Updated: {new Date(meta.fetchedAt).toLocaleTimeString()}</span>
                   </div>
                 </div>
