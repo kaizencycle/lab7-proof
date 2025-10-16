@@ -151,13 +151,25 @@ const composer: React.CSSProperties = { display: "grid", gridTemplateColumns: "1
 const ta: React.CSSProperties = { border: "1px solid #d1d5db", borderRadius: 10, padding: 12, fontSize: 14, background: "white", resize: "vertical" };
 const sendBtn: React.CSSProperties = { border: "1px solid #111827", background: "#111827", color: "white", borderRadius: 10, fontWeight: 700, cursor: "pointer" };
 const bubble = (role: "user" | "assistant" | "system"): React.CSSProperties => ({
-  background: role === "user" ? "white" : role === "assistant" ? "#eef2ff" : "#fff7ed",
-  border: "1px solid #e5e7eb",
-  borderRadius: 12,
-  padding: 12,
-  marginBottom: 10
+  background: role === "user"
+    ? "#f9fafb"
+    : role === "assistant"
+    ? "#e0e7ff"
+    : "#fef3c7",
+  border: "1px solid #cbd5e1",
+  borderRadius: 10,
+  padding: "10px 12px",
+  marginBottom: 10,
+  color: "#0f172a",
+  lineHeight: 1.5,
 });
-const pre: React.CSSProperties = { whiteSpace: "pre-wrap", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", fontSize: 13, lineHeight: 1.5 };
+const pre: React.CSSProperties = {
+  whiteSpace: "pre-wrap",
+  margin: 0,
+  fontFamily: "Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif",
+  fontSize: 14,
+  color: "#111827",
+};
 const chip = (active: boolean): React.CSSProperties => ({
   textAlign: "left",
   border: "1px solid #334155",
