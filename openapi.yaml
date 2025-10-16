@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Lab7-proof OAA API
+  title: OAA Gateway API
   version: 0.1.0
   description: |
     Online Apprenticeship Agent — Mentor drafts, critique, rubric→XP→Level→GIC.
@@ -94,6 +94,12 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
+
+  securitySchemes:
+    hmac:
+      type: http
+      scheme: bearer
+      description: Use X-Hub-Signature-256 header with sha256 HMAC of raw body
 
   schemas:
     MentorName:
@@ -205,3 +211,26 @@ components:
             - type: string
             - type: object
               additionalProperties: true
+  /agent/status:
+    post:
+      summary: Post agent status/event payloads behind gateway
+      security:
+        - hmac: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  received: { type: object }
+                  at: { type: string, format: date-time }

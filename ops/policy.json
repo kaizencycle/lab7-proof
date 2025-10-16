@@ -7,18 +7,47 @@
     "localhost",
     "127.0.0.1",
     "*.onrender.com",
-    "*.github.io"
+    "*.github.io",
+    "status.render.com",
+    "raw.githubusercontent.com",
+    "api.github.com"
+  ],
+  "blocked_domains": [
+    "*admin*",
+    "*login*",
+    "*checkout*"
+  ],
+  "allowed_paths": [
+    "^\\.github/workflows/",
+    "^docs/",
+    "^scripts/",
+    "^routes/api/",
+    "^lib/",
+    "^gateway/"
+  ],
+  "protected_paths": [
+    "^ledger/",
+    "^migrations/",
+    "^policy/",
+    "^gateway/prod/"
   ],
   "circuit_breakers": {
     "global_timeout_ms": 30000,
     "max_concurrent_requests": 100,
     "error_threshold_pct": 50,
-    "recovery_timeout_ms": 60000
+    "recovery_timeout_ms": 60000,
+    "scout_error_rate_pct": 20,
+    "deploy_rollback_on": [
+      "p95_latency_ms>1500",
+      "5xx_rate_pct>3"
+    ]
   },
   "rate_limits": {
     "requests_per_minute": 1000,
     "burst_limit": 100,
-    "window_size_ms": 60000
+    "window_size_ms": 60000,
+    "scout_reads_per_min": 10,
+    "deploys_per_day": 5
   },
   "security": {
     "require_https": false,
@@ -79,5 +108,10 @@
     "tracing_enabled": true,
     "health_checks_enabled": true,
     "performance_monitoring": true
-  }
+  },
+  "require_human_for": [
+    "protected_paths",
+    "new_external_endpoint",
+    "schema_change"
+  ]
 }
