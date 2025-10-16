@@ -1,1 +1,12 @@
-{}
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/echo/latest/route": "app/api/echo/latest/route.js",
+  "/api/hub/chat/route": "app/api/hub/chat/route.js",
+  "/echo/page": "app/echo/page.js",
+  "/hub/page": "app/hub/page.js",
+  "/mentor/page": "app/mentor/page.js",
+  "/api/scout-test/route": "app/api/scout-test/route.js",
+  "/page": "app/page.js",
+  "/scout-dashboard/page": "app/scout-dashboard/page.js",
+  "/scout-test/page": "app/scout-test/page.js"
+}
