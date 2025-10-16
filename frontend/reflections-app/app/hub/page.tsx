@@ -54,7 +54,8 @@ export default function HubPage() {
       }
       // attach sources
       if (reply.sources && reply.sources.length > 0) {
-        setMessages((m) => [...m, { role: "assistant", content: renderSources(reply.sources), meta: { sources: reply.sources } }]);
+        const sources = reply.sources;
+        setMessages((m) => [...m, { role: "assistant", content: renderSources(sources), meta: { sources } }]);
       }
     } catch (e: any) {
       setMessages((m) => [...m, { role: "assistant", content: `⚠️ ${e.message || "Hub error"}` }]);
