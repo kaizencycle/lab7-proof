@@ -1,10 +1,10 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/api/scout-test/route": "app/api/scout-test/route.js",
-  "/api/echo/latest/route": "app/api/echo/latest/route.js",
-  "/mentor/page": "app/mentor/page.js",
-  "/page": "app/page.js",
   "/echo/page": "app/echo/page.js",
+  "/page": "app/page.js",
+  "/api/echo/latest/route": "app/api/echo/latest/route.js",
   "/scout-test/page": "app/scout-test/page.js",
-  "/scout-dashboard/page": "app/scout-dashboard/page.js"
+  "/scout-dashboard/page": "app/scout-dashboard/page.js",
+  "/mentor/page": "app/mentor/page.js"
 }
