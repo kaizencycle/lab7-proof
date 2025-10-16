@@ -14,7 +14,7 @@ interface Message {
   content: string;
   role: 'user' | 'assistant' | 'system';
   timestamp: Date;
-  type?: 'text' | 'attestation' | 'status' | 'error';
+  type?: 'text' | 'attestation' | 'status' | 'error' | 'code' | 'ollama';
   metadata?: any;
 }
 
@@ -152,49 +152,79 @@ export default function Home() {
     }, 1000 + Math.random() * 2000);
   };
 
-  const generateResponse = (input: string): { content: string; type: 'text' | 'attestation' | 'status' | 'error'; metadata?: any } => {
+  const generateResponse = (input: string): { content: string; type: 'text' | 'attestation' | 'status' | 'error' | 'code' | 'ollama'; metadata?: any } => {
     const lowerInput = input.toLowerCase();
+
+    // Ollama LLM Agent responses
+    if (lowerInput.includes('ollama') || lowerInput.includes('model') || lowerInput.includes('llm')) {
+      return {
+        content: 'I\'m powered by Ollama LLM and integrated with the OAA (Open Attestation Authority) system. I can help you with:\n\n🤖 **LLM Capabilities:**\n• Code generation and analysis\n• Natural language processing\n• Document understanding\n• Technical problem solving\n\n🔐 **OAA Integration:**\n• Digital attestation creation\n• Cryptographic verification\n• Policy as Learning (PAL) operations\n• Quality gate management\n\nWhat would you like me to help you with today?',
+        type: 'ollama',
+        metadata: { 
+          model: 'llama3.1:8b',
+          context: 'OAA-Ollama-Integration',
+          capabilities: ['code', 'attestation', 'analysis', 'generation']
+        }
+      };
+    }
 
     if (lowerInput.includes('status') || lowerInput.includes('health')) {
       return {
-        content: 'Here\'s the current system status:',
+        content: 'Here\'s the current OAA system status:',
         type: 'status',
         metadata: status
       };
     }
 
-    if (lowerInput.includes('attest') || lowerInput.includes('verify')) {
+    if (lowerInput.includes('attest') || lowerInput.includes('verify') || lowerInput.includes('signature')) {
       return {
-        content: 'I can help you create and verify attestations. Please provide the data you want to attest, and I\'ll process it through the OAA Core engine.',
+        content: 'I can help you create and verify digital attestations using the OAA Core engine. Here\'s what I can do:\n\n🔐 **Attestation Creation:**\n• Generate cryptographic signatures\n• Create verifiable credentials\n• Timestamp and hash data\n• Link to blockchain records\n\n🔍 **Verification:**\n• Validate digital signatures\n• Check credential authenticity\n• Verify timestamp integrity\n• Cross-reference with public keys\n\nPlease provide the data you want to attest, and I\'ll process it through our secure OAA pipeline.',
         type: 'attestation',
-        metadata: { action: 'create_attestation' }
+        metadata: { 
+          action: 'create_attestation',
+          algorithm: 'Ed25519',
+          hash: 'SHA-256',
+          timestamp: new Date().toISOString()
+        }
       };
     }
 
-    if (lowerInput.includes('help') || lowerInput.includes('commands')) {
+    if (lowerInput.includes('code') || lowerInput.includes('generate') || lowerInput.includes('script')) {
       return {
-        content: 'Here are the available commands:\n\n• **Status** - Check system health and service status\n• **Attest** - Create or verify digital attestations\n• **Keys** - View public keys for verification\n• **Logs** - Access system logs and monitoring\n• **PAL** - Policy as Learning operations\n• **Zeus** - Quality gate management\n\nYou can also ask me about specific services or request detailed information about any OAA functionality.',
+        content: 'I can help you generate code for OAA operations. Here\'s an example Python script for creating an attestation:\n\n```python\nimport hashlib\nimport json\nfrom datetime import datetime\nfrom cryptography.hazmat.primitives import hashes\nfrom cryptography.hazmat.primitives.asymmetric import ed25519\n\nclass OAAAttestation:\n    def __init__(self, private_key):\n        self.private_key = private_key\n    \n    def create_attestation(self, data):\n        # Create hash of data\n        data_hash = hashlib.sha256(json.dumps(data).encode()).hexdigest()\n        \n        # Create timestamp\n        timestamp = datetime.utcnow().isoformat()\n        \n        # Create attestation payload\n        payload = {\n            "data": data,\n            "hash": data_hash,\n            "timestamp": timestamp,\n            "issuer": "OAA-Core"\n        }\n        \n        # Sign the payload\n        signature = self.private_key.sign(\n            json.dumps(payload).encode(),\n            hashes.SHA256()\n        )\n        \n        return {\n            "payload": payload,\n            "signature": signature.hex(),\n            "public_key": self.private_key.public_key().public_bytes_raw().hex()\n        }\n```\n\nWould you like me to generate specific code for your use case?',
+        type: 'code',
+        metadata: { 
+          language: 'python',
+          framework: 'OAA-Core',
+          libraries: ['cryptography', 'hashlib', 'json']
+        }
+      };
+    }
+
+    if (lowerInput.includes('help') || lowerInput.includes('commands') || lowerInput.includes('what can you do')) {
+      return {
+        content: 'I\'m your OAA Assistant powered by Ollama LLM. Here\'s what I can help you with:\n\n🤖 **AI Capabilities:**\n• Code generation and analysis\n• Natural language understanding\n• Technical problem solving\n• Document processing\n\n🔐 **OAA Operations:**\n• **Attestations** - Create/verify digital signatures\n• **Status** - Check system health and services\n• **Keys** - Manage cryptographic keys\n• **PAL** - Policy as Learning operations\n• **Zeus** - Quality gate management\n• **Logs** - Access system monitoring\n\n💻 **Development:**\n• Generate Python/JavaScript code\n• Debug OAA integrations\n• Create API documentation\n• Analyze system performance\n\nJust ask me anything about OAA, coding, or system management!',
         type: 'text'
       };
     }
 
-    if (lowerInput.includes('pal') || lowerInput.includes('policy')) {
+    if (lowerInput.includes('pal') || lowerInput.includes('policy') || lowerInput.includes('learning')) {
       return {
-        content: 'The PAL (Policy as Learning) Engine is currently running with adaptive learning policies. It\'s monitoring canary rollouts and maintaining safety gates. Would you like me to show you the current policy status or help with a specific PAL operation?',
+        content: 'The PAL (Policy as Learning) Engine is our adaptive learning system that continuously improves OAA operations:\n\n🧠 **Current Status:**\n• **Model Version:** v2.1.0\n• **Learning Rate:** 0.001\n• **Training Data:** 10,000+ attestations\n• **Accuracy:** 94.7%\n\n📊 **Active Policies:**\n• Canary rollout management\n• Safety gate enforcement\n• Quality threshold monitoring\n• Anomaly detection\n\n🔄 **Learning Loops:**\n• Real-time feedback collection\n• Automated policy updates\n• Performance optimization\n• Risk assessment\n\nWould you like me to show you specific PAL metrics or help configure learning parameters?',
         type: 'text'
       };
     }
 
-    if (lowerInput.includes('zeus') || lowerInput.includes('gate')) {
+    if (lowerInput.includes('zeus') || lowerInput.includes('gate') || lowerInput.includes('quality')) {
       return {
-        content: 'Zeus Gateway is active and monitoring quality gates. All services have passed the current safety checks. The system is ready for production traffic.',
+        content: 'Zeus Gateway is our quality assurance system monitoring all OAA operations:\n\n⚡ **Current Status:**\n• **Version:** v1.5.2\n• **Uptime:** 99.9%\n• **Gates Active:** 12/12\n• **Success Rate:** 98.3%\n\n🛡️ **Quality Gates:**\n• **Security Gate** - Cryptographic validation\n• **Performance Gate** - Response time < 200ms\n• **Integrity Gate** - Data consistency checks\n• **Compliance Gate** - Regulatory adherence\n\n📈 **Metrics:**\n• Total requests: 1,247,892\n• Passed gates: 1,225,456\n• Failed gates: 22,436\n• Average latency: 156ms\n\nAll systems are green and ready for production traffic!',
         type: 'text'
       };
     }
 
-    // Default response
+    // Default intelligent response
     return {
-      content: 'I understand you\'re asking about: "' + input + '". I can help you with OAA operations, attestations, system monitoring, and policy management. Could you be more specific about what you\'d like to do?',
+      content: `I understand you're asking about: "${input}"\n\nAs your OAA Assistant powered by Ollama LLM, I can help you with:\n\n• **Code Generation** - Python, JavaScript, API integrations\n• **OAA Operations** - Attestations, verification, key management\n• **System Analysis** - Performance, logs, monitoring\n• **Technical Support** - Debugging, optimization, best practices\n\nCould you be more specific about what you'd like to accomplish? I'm here to help with both technical and OAA-related tasks!`,
       type: 'text'
     };
   };
@@ -314,6 +344,41 @@ export default function Home() {
                 <div className="text-xs text-gray-300">
                   Provide your data and I'll create a cryptographically signed attestation.
                 </div>
+                {message.metadata && (
+                  <div className="mt-2 text-xs text-purple-300">
+                    Algorithm: {message.metadata.algorithm} • Hash: {message.metadata.hash}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {message.type === 'code' && (
+              <div className="mt-3 p-3 bg-gray-900/50 rounded-lg border border-gray-600">
+                <div className="text-sm font-semibold mb-2 flex items-center">
+                  <Code size={16} className="mr-2 text-green-400" />
+                  Code Generated
+                </div>
+                <div className="text-xs text-gray-300 mb-2">
+                  Language: {message.metadata?.language} • Framework: {message.metadata?.framework}
+                </div>
+                <div className="text-xs text-gray-400">
+                  Libraries: {message.metadata?.libraries?.join(', ')}
+                </div>
+              </div>
+            )}
+
+            {message.type === 'ollama' && (
+              <div className="mt-3 p-3 bg-blue-900/30 rounded-lg border border-blue-500/30">
+                <div className="text-sm font-semibold mb-2 flex items-center">
+                  <Bot size={16} className="mr-2 text-blue-400" />
+                  Ollama LLM Agent
+                </div>
+                <div className="text-xs text-gray-300 mb-2">
+                  Model: {message.metadata?.model} • Context: {message.metadata?.context}
+                </div>
+                <div className="text-xs text-blue-300">
+                  Capabilities: {message.metadata?.capabilities?.join(', ')}
+                </div>
               </div>
             )}
           </div>
@@ -323,249 +388,264 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex">
-      {/* Header */}
-      <div className="fixed top-0 left-0 right-0 h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 z-50">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-          >
-            <Menu size={18} />
-          </button>
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
-              <span className="text-white font-bold text-xs">OAA</span>
+    <div className="h-screen bg-gray-900 text-white flex overflow-hidden">
+      {/* Left Sidebar */}
+      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-gray-800 border-r border-gray-700 flex flex-col transition-all duration-300 overflow-hidden`}>
+        {/* Sidebar Header */}
+        <div className="p-4 border-b border-gray-700">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">OAA</span>
             </div>
-            <span className="font-semibold text-sm">OAA Assistant</span>
+            <div>
+              <h2 className="font-semibold text-sm">OAA Assistant</h2>
+              <p className="text-xs text-gray-400">Ollama LLM Agent</p>
+            </div>
           </div>
         </div>
-        
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1 bg-gray-700 rounded px-2 py-1">
-            <Search size={14} className="text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search files, messages..." 
-              className="bg-transparent text-sm text-gray-300 placeholder-gray-400 focus:outline-none w-48"
-            />
-          </div>
-          <button className="p-1.5 hover:bg-gray-700 rounded transition-colors">
-            <Settings size={18} />
+
+        {/* Sidebar Tabs */}
+        <div className="flex border-b border-gray-700">
+          <button
+            onClick={() => setActivePanel('chat')}
+            className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+              activePanel === 'chat' 
+                ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <MessageSquare size={14} className="inline mr-1" />
+            Chat
+          </button>
+          <button
+            onClick={() => setActivePanel('files')}
+            className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+              activePanel === 'files' 
+                ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <FolderOpen size={14} className="inline mr-1" />
+            Files
+          </button>
+          <button
+            onClick={() => setActivePanel('search')}
+            className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+              activePanel === 'search' 
+                ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <Search size={14} className="inline mr-1" />
+            Search
           </button>
         </div>
-      </div>
 
-      {/* Sidebar */}
-      {sidebarOpen && (
-        <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col mt-12">
-          {/* Sidebar Tabs */}
-          <div className="flex border-b border-gray-700">
-            <button
-              onClick={() => setActivePanel('chat')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activePanel === 'chat' 
-                  ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <MessageSquare size={16} className="inline mr-2" />
-              Chat
-            </button>
-            <button
-              onClick={() => setActivePanel('files')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activePanel === 'files' 
-                  ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <FolderOpen size={16} className="inline mr-2" />
-              Files
-            </button>
-            <button
-              onClick={() => setActivePanel('search')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activePanel === 'search' 
-                  ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Search size={16} className="inline mr-2" />
-              Search
-            </button>
-          </div>
+        {/* Panel Content */}
+        <div className="flex-1 overflow-y-auto">
+          {activePanel === 'chat' && (
+            <div className="p-3">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-gray-300">Recent Chats</h3>
+                <button className="p-1 hover:bg-gray-700 rounded transition-colors">
+                  <Plus size={12} />
+                </button>
+              </div>
+              <div className="space-y-1">
+                {chatHistory.map((chat) => (
+                  <div key={chat.id} className="p-2 rounded hover:bg-gray-700/50 cursor-pointer group">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-300 truncate">{chat.title}</span>
+                      <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-600 rounded transition-all">
+                        <MoreHorizontal size={10} />
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {formatTime(chat.timestamp)} • {chat.messages} msgs
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-          {/* Panel Content */}
-          <div className="flex-1 overflow-y-auto">
-            {activePanel === 'chat' && (
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-gray-300">Recent Chats</h3>
-                  <button className="p-1 hover:bg-gray-700 rounded transition-colors">
-                    <Plus size={16} />
+              <div className="mt-4">
+                <h3 className="text-xs font-semibold text-gray-300 mb-2">Quick Actions</h3>
+                <div className="space-y-1">
+                  <button 
+                    onClick={() => setInputValue('Check system status')}
+                    className="w-full text-left p-1.5 rounded hover:bg-gray-700/50 transition-colors text-xs flex items-center space-x-2"
+                  >
+                    <Activity size={12} className="text-green-400" />
+                    <span>System Status</span>
+                  </button>
+                  <button 
+                    onClick={() => setInputValue('Create attestation')}
+                    className="w-full text-left p-1.5 rounded hover:bg-gray-700/50 transition-colors text-xs flex items-center space-x-2"
+                  >
+                    <Shield size={12} className="text-blue-400" />
+                    <span>Create Attestation</span>
+                  </button>
+                  <button 
+                    onClick={() => setInputValue('View public keys')}
+                    className="w-full text-left p-1.5 rounded hover:bg-gray-700/50 transition-colors text-xs flex items-center space-x-2"
+                  >
+                    <Key size={12} className="text-purple-400" />
+                    <span>Public Keys</span>
                   </button>
                 </div>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="text-xs font-semibold text-gray-300 mb-2">OAA Services</h3>
                 <div className="space-y-1">
-                  {chatHistory.map((chat) => (
-                    <div key={chat.id} className="p-2 rounded hover:bg-gray-700/50 cursor-pointer group">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-300 truncate">{chat.title}</span>
-                        <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-600 rounded transition-all">
-                          <MoreHorizontal size={14} />
-                        </button>
+                  {status.services.map((service, index) => (
+                    <div key={index} className="flex items-center justify-between p-1.5 rounded bg-gray-700/30">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          service.status === 'running' ? 'bg-green-400' : 'bg-red-400'
+                        }`}></div>
+                        <span className="text-xs text-gray-300">{service.name}</span>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {formatTime(chat.timestamp)} • {chat.messages} messages
-                      </div>
+                      <span className="text-xs text-gray-400">v{service.version}</span>
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
 
-                <div className="mt-6">
-                  <h3 className="text-sm font-semibold text-gray-300 mb-3">Quick Actions</h3>
-                  <div className="space-y-1">
-                    <button 
-                      onClick={() => setInputValue('Check system status')}
-                      className="w-full text-left p-2 rounded hover:bg-gray-700/50 transition-colors text-sm flex items-center space-x-2"
-                    >
-                      <Activity size={16} className="text-green-400" />
-                      <span>System Status</span>
-                    </button>
-                    <button 
-                      onClick={() => setInputValue('Create attestation')}
-                      className="w-full text-left p-2 rounded hover:bg-gray-700/50 transition-colors text-sm flex items-center space-x-2"
-                    >
-                      <Shield size={16} className="text-blue-400" />
-                      <span>Create Attestation</span>
-                    </button>
-                    <button 
-                      onClick={() => setInputValue('View public keys')}
-                      className="w-full text-left p-2 rounded hover:bg-gray-700/50 transition-colors text-sm flex items-center space-x-2"
-                    >
-                      <Key size={16} className="text-purple-400" />
-                      <span>Public Keys</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h3 className="text-sm font-semibold text-gray-300 mb-3">Services</h3>
-                  <div className="space-y-1">
-                    {status.services.map((service, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 rounded bg-gray-700/30">
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-2 h-2 rounded-full ${
-                            service.status === 'running' ? 'bg-green-400' : 'bg-red-400'
-                          }`}></div>
-                          <span className="text-sm text-gray-300">{service.name}</span>
-                        </div>
-                        <span className="text-xs text-gray-400">v{service.version}</span>
-                      </div>
-                    ))}
-                  </div>
+          {activePanel === 'files' && (
+            <div className="p-2">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <h3 className="text-xs font-semibold text-gray-300">Explorer</h3>
+                <div className="flex space-x-1">
+                  <button className="p-1 hover:bg-gray-700 rounded transition-colors">
+                    <Plus size={10} />
+                  </button>
+                  <button className="p-1 hover:bg-gray-700 rounded transition-colors">
+                    <MoreHorizontal size={10} />
+                  </button>
                 </div>
               </div>
-            )}
-
-            {activePanel === 'files' && (
-              <div className="p-2">
-                <div className="flex items-center justify-between mb-3 px-2">
-                  <h3 className="text-sm font-semibold text-gray-300">Explorer</h3>
-                  <div className="flex space-x-1">
-                    <button className="p-1 hover:bg-gray-700 rounded transition-colors">
-                      <Plus size={14} />
-                    </button>
-                    <button className="p-1 hover:bg-gray-700 rounded transition-colors">
-                      <MoreHorizontal size={14} />
-                    </button>
-                  </div>
-                </div>
-                <div className="text-xs">
-                  {renderFileTree(fileTree)}
-                </div>
+              <div className="text-xs">
+                {renderFileTree(fileTree)}
               </div>
-            )}
+            </div>
+          )}
 
-            {activePanel === 'search' && (
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">Search</h3>
-                <div className="space-y-2">
-                  <input 
-                    type="text" 
-                    placeholder="Search in files..." 
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-                  />
-                  <div className="text-xs text-gray-500">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <input type="checkbox" className="rounded" defaultChecked />
-                      <span>Include file contents</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded" />
-                      <span>Case sensitive</span>
-                    </div>
+          {activePanel === 'search' && (
+            <div className="p-3">
+              <h3 className="text-xs font-semibold text-gray-300 mb-2">Search</h3>
+              <div className="space-y-2">
+                <input 
+                  type="text" 
+                  placeholder="Search in files..." 
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500"
+                />
+                <div className="text-xs text-gray-500">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <input type="checkbox" className="rounded" defaultChecked />
+                    <span>Include file contents</span>
                   </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col mt-12">
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 chat-scroll">
-          {messages.map(renderMessage)}
-          
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                  <Bot size={16} />
-                </div>
-                <div className="bg-gray-800 rounded-2xl px-4 py-3 border border-gray-700">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" className="rounded" />
+                    <span>Case sensitive</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+            >
+              <Menu size={16} />
+            </button>
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                <span className="text-white font-bold text-xs">OAA</span>
+              </div>
+              <span className="font-semibold text-sm">OAA Assistant</span>
+              <span className="text-xs text-gray-400">• Ollama LLM Agent</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 bg-gray-700 rounded px-2 py-1">
+              <Search size={12} className="text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search files, messages..." 
+                className="bg-transparent text-xs text-gray-300 placeholder-gray-400 focus:outline-none w-32"
+              />
+            </div>
+            <button className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+              <Settings size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-          <div className="p-4">
-            <div className="flex items-end space-x-3 max-w-4xl mx-auto">
-              <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
-                <Paperclip size={20} />
-              </button>
-              <div className="flex-1 relative">
-                <textarea
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask me about attestations, system status, or OAA operations..."
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-3 pr-12 resize-none focus:outline-none focus:border-blue-500 text-white placeholder-gray-400 input-focus backdrop-blur-sm input-enhanced focus-ring"
-                  rows={1}
-                  style={{ minHeight: '48px', maxHeight: '120px' }}
-                />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
-                  Press Enter to send
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll">
+            {messages.map(renderMessage)}
+            
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                    <Bot size={16} />
+                  </div>
+                  <div className="bg-gray-800 rounded-2xl px-4 py-3 border border-gray-700">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isTyping}
-                className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-xl transition-colors btn-hover cursor-btn"
-              >
-                <Send size={20} />
-              </button>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className="border-t border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <div className="p-4">
+              <div className="flex items-end space-x-3 max-w-4xl mx-auto">
+                <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+                  <Paperclip size={18} />
+                </button>
+                <div className="flex-1 relative">
+                  <textarea
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask me about attestations, system status, or OAA operations..."
+                    className="w-full bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-3 pr-12 resize-none focus:outline-none focus:border-blue-500 text-white placeholder-gray-400 input-focus backdrop-blur-sm input-enhanced focus-ring"
+                    rows={1}
+                    style={{ minHeight: '48px', maxHeight: '120px' }}
+                  />
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
+                    Press Enter to send
+                  </div>
+                </div>
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!inputValue.trim() || isTyping}
+                  className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-xl transition-colors btn-hover cursor-btn"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
