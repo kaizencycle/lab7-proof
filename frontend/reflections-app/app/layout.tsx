@@ -15,7 +15,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="bg-gray-900 text-white antialiased" style={{ margin: 0, fontFamily: "Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif" }}>
-        <NavBar />
         {children}
       </body>
     </html>
