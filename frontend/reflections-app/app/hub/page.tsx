@@ -53,7 +53,7 @@ export default function HubPage() {
         await new Promise((r) => setTimeout(r, 10));
       }
       // attach sources
-      if (reply.sources?.length) {
+      if (reply.sources && reply.sources.length > 0) {
         setMessages((m) => [...m, { role: "assistant", content: renderSources(reply.sources), meta: { sources: reply.sources } }]);
       }
     } catch (e: any) {
