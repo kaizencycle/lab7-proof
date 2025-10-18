@@ -1,74 +1,25 @@
-# render.yaml — Lab7 + automated Ed25519 key rotation
-
-version: "1"
-
-envVarGroups:
-  - name: lab7-oaa-config
+# render.yaml — FastAPI (uvicorn)
+services:
+  - type: web
+    name: oaa-api-library
+    env: python
+    plan: starter
+    region: oregon
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
-      # --- REQUIRED: current signing keys (base64 contents of files) ---
-      - key: OAA_ED25519_PRIVATE_B64
-        value: "YOUR_REAL_BASE64_KEY"
-      - key: OAA_ED25519_PUBLIC_B64
-        value: "SFrlLxcgOfW5Uqei+13VFVp/nhOigQkFzY87NllF2bU="
-
-      # --- OAA identity / versioning ---
+      - key: HUB_BASE_URL
+        value: https://oaa-api-library.onrender.com
+      - key: LEDGER_BASE_URL
+        sync: false
+      - key: LEDGER_ADMIN_TOKEN
+        sync: false
       - key: OAA_ISSUER
-        value: "oaa.lab7"
-      - key: OAA_SIGNING_VERSION
-        value: "oaa:ed25519:v1"
-      - key: OAA_SIGNING_CREATED
-        value: "2025-10-12T00:00:00Z"
-
-      # --- Verification toggles (tune later) ---
+        value: oaa_hub
       - key: OAA_VERIFY_PIN_KEYS
         value: "true"
       - key: OAA_VERIFY_TS_WINDOW_MIN
         value: "10"
       - key: OAA_VERIFY_REQUIRE_NONCE
         value: "false"
-
-      # --- Optional Redis (nonce replay defense) ---
-      - key: OAA_NONCE_REDIS_URL
-        value: "redis://:PASS@HOST:6379/0"
-
-      # --- Civic Ledger integration (optional) ---
-      - key: LEDGER_URL
-        value: "https://civic-protocol-core-ledger.onrender.com"
-
-      # --- API Authentication ---
-      - key: API_KEY
-        value: "your-generated-render-api-key"
-
-services:
-  # 1) Lab7 Web API
-  - type: web
-    name: lab7-proof
-    runtime: python
-    plan: starter
-    autoDeploy: true
-    buildCommand: |
-      pip install -r requirements.txt
-    startCommand: |
-      uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - fromGroup: lab7-oaa-config
-    region: oregon
-
-  # 2) Cron Worker to rotate keys and redeploy Lab7
-  - type: cron
-    name: lab7-key-rotation
-    runtime: python
-    schedule: "0 0 */90 * *"   # every 90 days at 00:00 UTC
-    buildCommand: |
-      pip install -r requirements.txt
-    startCommand: |
-      # Generate fresh Ed25519 keys and write .env.rotate
-      python3 scripts/rotate_keys.py && \
-      # Push new values into Render via Deploy Hook (set in env below)
-      curl -fsSL -X POST "$REDEPLOY_HOOK_URL"
-    envVars:
-      - fromGroup: lab7-oaa-config
-      # Create this in the Web service → Settings → Deploy Hooks (copy URL)
-      - key: REDEPLOY_HOOK_URL
-        value: "REPLACE_ME_WITH_RENDER_DEPLOY_HOOK_URL"
-    region: oregon
+    healthCheckPath: /health
