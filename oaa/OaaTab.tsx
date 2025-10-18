@@ -179,26 +179,26 @@ export default function OaaTab() {
   };
 
   return (
-    <section className="oaa-tab p-6 max-w-6xl mx-auto">
+    <section className="oaa-tab p-4 md:p-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="mb-4 md:mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           🧠 OAA Central Hub
         </h2>
-        <p className="text-gray-600">
+        <p className="text-sm md:text-base text-gray-600">
           Plan • Act • Learn • Seal — Central nervous system for all labs and tools
         </p>
       </div>
 
       {/* Status Overview */}
       {status && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h3 className="text-xl font-semibold mb-4">System Status</h3>
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6">
+          <h3 className="text-lg md:text-xl font-semibold mb-4">System Status</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-medium text-gray-700">Hub</h4>
-              <p className="text-sm text-gray-600">{status.hub.name} v{status.hub.version}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4">
+            <div className="bg-gray-50 p-3 md:p-4 rounded mobile-card">
+              <h4 className="font-medium text-gray-700 text-sm md:text-base">Hub</h4>
+              <p className="text-xs md:text-sm text-gray-600">{status.hub.name} v{status.hub.version}</p>
               <span className={`inline-block px-2 py-1 rounded text-xs ${
                 status.hub.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
               }`}>
@@ -206,16 +206,16 @@ export default function OaaTab() {
               </span>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-medium text-gray-700">Labs</h4>
-              <p className="text-sm text-gray-600">
+            <div className="bg-gray-50 p-3 md:p-4 rounded mobile-card">
+              <h4 className="font-medium text-gray-700 text-sm md:text-base">Labs</h4>
+              <p className="text-xs md:text-sm text-gray-600">
                 {status.labs.filter(l => l.healthy).length} / {status.labs.length} healthy
               </p>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded">
-              <h4 className="font-medium text-gray-700">Tools</h4>
-              <p className="text-sm text-gray-600">
+            <div className="bg-gray-50 p-3 md:p-4 rounded mobile-card sm:col-span-2 md:col-span-1">
+              <h4 className="font-medium text-gray-700 text-sm md:text-base">Tools</h4>
+              <p className="text-xs md:text-sm text-gray-600">
                 {status.tools.filter(t => t.available).length} / {status.tools.length} available
               </p>
             </div>
@@ -223,14 +223,14 @@ export default function OaaTab() {
 
           {/* Lab Status */}
           <div className="mb-4">
-            <h4 className="font-medium text-gray-700 mb-2">Lab Status</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <h4 className="font-medium text-gray-700 mb-2 text-sm md:text-base">Lab Status</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mobile-status-grid">
               {status.labs.map(lab => (
-                <div key={lab.id} className="flex items-center space-x-2 text-sm">
+                <div key={lab.id} className="flex items-center space-x-2 text-xs md:text-sm mobile-status-item">
                   <span className={lab.healthy ? 'text-green-500' : 'text-red-500'}>
                     {lab.healthy ? '●' : '●'}
                   </span>
-                  <span className="text-gray-600">{lab.name}</span>
+                  <span className="text-gray-600 truncate">{lab.name}</span>
                 </div>
               ))}
             </div>
@@ -238,14 +238,14 @@ export default function OaaTab() {
 
           {/* Tool Status */}
           <div>
-            <h4 className="font-medium text-gray-700 mb-2">Tool Status</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <h4 className="font-medium text-gray-700 mb-2 text-sm md:text-base">Tool Status</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mobile-status-grid">
               {status.tools.map(tool => (
-                <div key={tool.name} className="flex items-center space-x-2 text-sm">
+                <div key={tool.name} className="flex items-center space-x-2 text-xs md:text-sm mobile-status-item">
                   <span className={tool.available ? 'text-green-500' : 'text-red-500'}>
                     {tool.available ? '●' : '●'}
                   </span>
-                  <span className="text-gray-600">{tool.name}</span>
+                  <span className="text-gray-600 truncate">{tool.name}</span>
                   {tool.success_rate && (
                     <span className="text-xs text-gray-500">
                       ({Math.round(tool.success_rate)}%)
@@ -259,14 +259,14 @@ export default function OaaTab() {
       )}
 
       {/* Controls */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+      <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6">
+        <h3 className="text-lg md:text-xl font-semibold mb-4">Quick Actions</h3>
         
-        <div className="flex flex-wrap gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 mobile-button-grid">
           <button
             onClick={() => executePlan('fetch_data')}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            className="mobile-button touch-target px-4 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm md:text-base"
           >
             {loading ? 'Executing...' : 'Fetch Data'}
           </button>
@@ -274,33 +274,33 @@ export default function OaaTab() {
           <button
             onClick={() => executePlan('health_check')}
             disabled={loading}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            className="mobile-button touch-target px-4 py-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 text-sm md:text-base"
           >
             Health Check
           </button>
           
           <button
             onClick={fetchStatus}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="mobile-button touch-target px-4 py-3 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm md:text-base"
           >
             Refresh Status
           </button>
           
           <button
             onClick={clearCards}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="mobile-button touch-target px-4 py-3 bg-red-600 text-white rounded hover:bg-red-700 text-sm md:text-base"
           >
             Clear Cards
           </button>
         </div>
 
         <div className="flex items-center space-x-4">
-          <label className="flex items-center">
+          <label className="flex items-center text-sm md:text-base">
             <input
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="mr-2"
+              className="mr-2 w-4 h-4"
             />
             Auto-refresh (30s)
           </label>
@@ -325,40 +325,40 @@ export default function OaaTab() {
       {/* Cards Display */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-xl font-semibold">Execution Cards</h3>
-          <span className="text-sm text-gray-500">{cards.length} cards</span>
+          <h3 className="text-lg md:text-xl font-semibold">Execution Cards</h3>
+          <span className="text-xs md:text-sm text-gray-500">{cards.length} cards</span>
         </div>
 
         {cards.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base">
             No execution cards yet. Try running a quick action above.
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {cards.map(card => (
-              <div key={card.id} className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-start justify-between mb-3">
+              <div key={card.id} className="bg-white rounded-lg shadow-md p-4 md:p-6 mobile-card">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg">{getStatusIcon(card.status)}</span>
-                    <h4 className="font-semibold text-gray-900">{card.title}</h4>
-                    <span className={`text-sm ${getStatusColor(card.status)}`}>
+                    <span className="text-base md:text-lg">{getStatusIcon(card.status)}</span>
+                    <h4 className="font-semibold text-gray-900 text-sm md:text-base">{card.title}</h4>
+                    <span className={`text-xs md:text-sm ${getStatusColor(card.status)}`}>
                       {card.status.toUpperCase()}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-xs md:text-sm text-gray-500">
                     {card.timestamp.toLocaleTimeString()}
                   </div>
                 </div>
 
                 <div className="mb-3">
-                  <div className="text-sm text-gray-600 mb-2">
+                  <div className="text-xs md:text-sm text-gray-600 mb-2">
                     <strong>Tool:</strong> {card.tool} | 
                     <strong> Execution Time:</strong> {card.execution_time_ms}ms
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded p-3">
-                  <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+                <div className="bg-gray-50 rounded p-3 overflow-x-auto">
+                  <pre className="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">
                     {JSON.stringify(card.content, null, 2)}
                   </pre>
                 </div>
