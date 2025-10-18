@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 jobs:
   verify:
-    uses: your-org/ledger-core/.github/workflows/reusable-copilot-verify.yml@main
+    uses: kaizencycle/lab7-proof/.github/workflows/reusable-copilot-verify.yml@main
     secrets: inherit
     with:
       min_score: "0.35"     # tune per-repo if desired
