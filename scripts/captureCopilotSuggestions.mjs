@@ -7,9 +7,10 @@
  */
 import fs from "fs";
 import { execSync } from "child_process";
+import path from "path";
 
 function sh(cmd){ try { return execSync(cmd, {stdio:["ignore","pipe","ignore"]}).toString(); } catch { return ""; } }
-function writeJSON(p, obj){ fs.mkdirSync(require("path").dirname(p), { recursive: true }); fs.writeFileSync(p, JSON.stringify(obj, null, 2)); }
+function writeJSON(p, obj){ fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, JSON.stringify(obj, null, 2)); }
 
 const out = ".copilot/suggestions.json";
 let suggestions = [];

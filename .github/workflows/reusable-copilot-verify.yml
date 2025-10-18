@@ -2,9 +2,18 @@ name: reusable-copilot-verify
 on:
   workflow_call:
     inputs:
-      min_score:  { type: string, required: false, default: "0.35" }
-      fail_on_low:{ type: string, required: false, default: "false" } # "true" to fail job if below min_score
-      post_comment: { type: string, required: false, default: "true" } # "true" to post PR comment
+      min_score:
+        type: string
+        required: false
+        default: "0.35"
+      fail_on_low:
+        type: string
+        required: false
+        default: "false" # "true" to fail job if below min_score
+      post_comment:
+        type: string
+        required: false
+        default: "true" # "true" to post PR comment
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -58,23 +67,7 @@ jobs:
             const status = proof.conforms ? '✅ CONFORMS' : '❌ DIVERGES';
             const emoji = proof.conforms ? '🎉' : '⚠️';
             
-            const comment = `## ${emoji} Copilot Verification Results
-            
-**Status:** ${status}  
-**Overlap Score:** ${score}% (threshold: ${(proof.minScore * 100).toFixed(1)}%)  
-**Proof:** [Download artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-
-<details>
-<summary>📊 Detailed Results</summary>
-
-- **Files Changed:** ${proof.metadata?.totalChunks || 0}
-- **Suggestions Analyzed:** ${proof.metadata?.totalSuggestions || 0}
-- **Valid Comparisons:** ${proof.metadata?.validComparisons || 0}
-
-${proof.details?.length > 0 ? '**Per-file scores:**\n' + proof.details.map((d, i) => `- \`${d.file}\`: ${(d.score * 100).toFixed(1)}%`).join('\n') : ''}
-</details>
-
-*This verification compares your code changes against Copilot suggestions to ensure alignment with AI-assisted development practices.*`;
+            const comment = `## ${emoji} Copilot Verification Results\n\n**Status:** ${status}\n**Overlap Score:** ${score}% (threshold: ${(proof.minScore * 100).toFixed(1)}%)\n**Proof:** [Download artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n<details>\n<summary>📊 Detailed Results</summary>\n\n- **Files Changed:** ${proof.metadata?.totalChunks || 0}\n- **Suggestions Analyzed:** ${proof.metadata?.totalSuggestions || 0}\n- **Valid Comparisons:** ${proof.metadata?.validComparisons || 0}\n\n${proof.details?.length > 0 ? '**Per-file scores:**\\n' + proof.details.map((d, i) => `- \\`${d.file}\\`: ${(d.score * 100).toFixed(1)}%`).join('\\n') : ''}\n</details>\n\n*This verification compares your code changes against Copilot suggestions to ensure alignment with AI-assisted development practices.*`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,

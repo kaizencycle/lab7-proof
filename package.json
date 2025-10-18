@@ -6,7 +6,8 @@
     "oaa-verify": "./bin/oaa-verify.js"
   },
   "dependencies": {
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "yaml": "^2.8.1"
   },
   "scripts": {
     "prepare": "husky install"
