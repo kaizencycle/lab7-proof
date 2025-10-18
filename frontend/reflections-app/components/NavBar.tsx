@@ -10,6 +10,7 @@ export default function NavBar() {
   const links = [
     { href: "/hub", label: "OAA Hub" },
     { href: "/reflections", label: "Reflections" },
+    { href: "/quality-dashboard", label: "Quality" },
     { href: "/docs", label: "Docs" },
   ];
 

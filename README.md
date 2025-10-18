@@ -38,6 +38,28 @@ This repository implements an Ethical Continuous Integration (ECI) pipeline that
 5. **Quorum**: GPT determines if 3/4 models approve the change
 6. **Attestation**: Results are cryptographically logged to the ledger
 
+## Quality Tracking & Anti-Slop System
+
+This system implements comprehensive quality tracking to prevent "AI slop" through:
+
+- **Provenance-by-default**: Every output is tracked with source attribution
+- **Memory hygiene**: Schema validation and quarantine for malformed data  
+- **Human-in-the-loop**: Multi-agent cross-checks and Copilot verification
+- **Incentive alignment**: Quality gates tied to GIC rewards
+- **Retrieval grounding**: Beaconed objects with verifiable metadata
+
+### Quality Dashboard
+
+Access the real-time quality dashboard at `/quality-dashboard` to monitor:
+- Provenance coverage (target: >90%)
+- Hallucination rate (target: <10%)
+- Duplicate ratio (target: <5%)
+- Beacon validity (target: >95%)
+- Copilot overlap score (target: >50%)
+- Rollback rate (target: <10%)
+
+See [QUALITY_TRACKING_INTEGRATION.md](./QUALITY_TRACKING_INTEGRATION.md) for detailed integration guide.
+
 ## Quick Start
 
 ### Prerequisites
