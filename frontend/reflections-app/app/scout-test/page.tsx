@@ -206,7 +206,8 @@ export default function ScoutTestPage() {
                 { name: 'userId', type: 'number' }
               ]}
               refreshInterval={300}
-              children={(data: any, meta: any) => (
+            >
+              {(data: any, meta: any) => (
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
                   <h4 className="text-lg font-semibold text-blue-900 mb-2">
                     {String(data.title || '')}
@@ -220,7 +221,7 @@ export default function ScoutTestPage() {
                   </div>
                 </div>
               )}
-            />
+            </OaaLiveCard>
           </div>
         </div>
 

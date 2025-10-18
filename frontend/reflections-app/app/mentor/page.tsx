@@ -231,7 +231,7 @@ export default function MentorPage() {
     <div style={{ maxWidth: 1100, margin: "40px auto", padding: "0 20px", lineHeight: 1.5 }}>
       <h1>Lab7 — Online Apprenticeship Agent</h1>
       <p style={{ marginTop: 4, opacity: 0.85 }}>
-        <em>"Initializing Lab7-proof (OAA) — Mentor–Apprentice Integrity Framework."</em>
+        <em>&ldquo;Initializing Lab7-proof (OAA) — Mentor–Apprentice Integrity Framework.&rdquo;</em>
       </p>
 
       {/* OAA Console */}
@@ -404,7 +404,7 @@ export default function MentorPage() {
         <div style={modalBackdrop}>
           <div style={modal}>
             <h3 style={{ marginTop: 0 }}>Synthesize (weights)</h3>
-            <p style={{ marginTop: -6, opacity: 0.8 }}>Adjust mentor weights (sum doesn't need to be 1; we normalize internally).</p>
+            <p style={{ marginTop: -6, opacity: 0.8 }}>Adjust mentor weights (sum doesn&apos;t need to be 1; we normalize internally).</p>
             {Object.keys(drafts).map((m) => (
               <div key={m} style={{ display: "grid", gridTemplateColumns: "100px 1fr 50px", gap: 10, alignItems: "center", marginBottom: 8 }}>
                 <div style={{ textTransform: "capitalize" }}>{m}</div>
