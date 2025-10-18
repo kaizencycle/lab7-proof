@@ -349,10 +349,12 @@ export async function callLab7PolicyEndpoint(
   }
 }
 
-export default {
+const opsGuard = {
   detectAndRedactPii,
   analyzeContentSafety,
   evaluatePolicy,
   processWithOpsGuard,
   callLab7PolicyEndpoint,
 };
+
+export default opsGuard;
