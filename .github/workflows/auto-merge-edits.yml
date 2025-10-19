@@ -30,17 +30,25 @@ jobs:
           pip install mcp
 
       - name: Run auto-merge script
+        id: auto-merge
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
         run: |
           python scripts/auto_merge_edits.py
 
-      - name: Commit and push changes
+      - name: Auto-commit changes
         if: steps.auto-merge.outcome == 'success'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git diff --staged --quiet || git commit -m "Auto-merge: Processed lab7-edits $(date)"
-          git push
+          python scripts/auto_commit_changes.py
+
+      - name: Verify changes were committed
+        run: |
+          echo "Checking git status after auto-commit..."
+          git status --porcelain
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Warning: There are still uncommitted changes"
+            git status
+          else
+            echo "All changes have been committed successfully"
+          fi
