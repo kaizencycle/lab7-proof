@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Lab7 Background Agent - "made lab7 edit"
-Monitors lab7-edits folder and processes changes automatically
+Monitors lab7-edits folder and processes changes automatically with auto-commit
 """
 import os
 import sys
@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 import json
+import git
 
 class Lab7BackgroundAgent:
     def __init__(self):
@@ -17,6 +18,8 @@ class Lab7BackgroundAgent:
         self.agent_log = "logs/background_agent.jsonl"
         self.setup_logging()
         self.last_check = {}
+        self.repo = None
+        self.setup_git()
         
     def setup_logging(self):
         """Setup agent logging"""
@@ -24,6 +27,16 @@ class Lab7BackgroundAgent:
         if not os.path.exists(self.agent_log):
             with open(self.agent_log, "w", encoding='utf-8') as f:
                 f.write("")
+    
+    def setup_git(self):
+        """Setup git repository connection"""
+        try:
+            self.repo = git.Repo(".")
+            self.log_agent_action("git_setup", {"status": "success", "branch": self.repo.active_branch.name})
+        except Exception as e:
+            self.log_agent_action("git_setup", {"status": "error", "error": str(e)})
+            print(f"[AGENT] Warning: Git setup failed: {e}")
+            self.repo = None
     
     def log_agent_action(self, action, details):
         """Log agent actions"""
@@ -88,6 +101,12 @@ class Lab7BackgroundAgent:
             
             if success:
                 print("[AGENT] Successfully processed lab7 edits!")
+                
+                # Auto-commit changes
+                if self.auto_commit_changes():
+                    # Auto-push changes
+                    self.auto_push_changes()
+                
                 print("[AGENT] made lab7 edit - COMPLETE")
                 # Ensure folders are empty after successful merge
                 self.ensure_empty_folders()
@@ -114,6 +133,79 @@ class Lab7BackgroundAgent:
                 elif item.is_dir() and not any(item.iterdir()):
                     item.rmdir()
         print("[AGENT] Ensured v1, v2, v3 folders are empty and ready for next edits")
+    
+    def auto_commit_changes(self):
+        """Automatically commit any changes made during merge"""
+        if not self.repo:
+            print("[AGENT] Git not available, skipping auto-commit")
+            return False
+        
+        try:
+            # Check if there are any changes
+            if not self.repo.is_dirty() and not self.repo.untracked_files:
+                print("[AGENT] No changes to commit")
+                return True
+            
+            # Add all changes
+            self.repo.git.add(A=True)
+            
+            # Create commit message
+            timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+            commit_message = f"Auto-merge: Processed lab7-edits at {timestamp}"
+            
+            # Commit changes
+            commit = self.repo.index.commit(commit_message)
+            
+            self.log_agent_action("auto_commit", {
+                "success": True,
+                "commit_hash": commit.hexsha,
+                "message": commit_message,
+                "files_changed": len(self.repo.index.diff("HEAD~1")) if len(list(self.repo.iter_commits())) > 1 else len(self.repo.untracked_files)
+            })
+            
+            print(f"[AGENT] Auto-committed changes: {commit.hexsha[:8]}")
+            return True
+            
+        except Exception as e:
+            self.log_agent_action("auto_commit", {"success": False, "error": str(e)})
+            print(f"[AGENT] Auto-commit failed: {e}")
+            return False
+    
+    def auto_push_changes(self):
+        """Automatically push committed changes"""
+        if not self.repo:
+            print("[AGENT] Git not available, skipping auto-push")
+            return False
+        
+        try:
+            # Check if there are commits to push
+            origin = self.repo.remote('origin')
+            if not origin.exists():
+                print("[AGENT] No origin remote found, skipping push")
+                return False
+            
+            # Check if there are commits ahead of origin
+            local_commits = list(self.repo.iter_commits(f"{origin.name}/{self.repo.active_branch.name}..{self.repo.active_branch.name}"))
+            if not local_commits:
+                print("[AGENT] No commits to push")
+                return True
+            
+            # Push changes
+            origin.push(self.repo.active_branch)
+            
+            self.log_agent_action("auto_push", {
+                "success": True,
+                "commits_pushed": len(local_commits),
+                "branch": self.repo.active_branch.name
+            })
+            
+            print(f"[AGENT] Auto-pushed {len(local_commits)} commits to {self.repo.active_branch.name}")
+            return True
+            
+        except Exception as e:
+            self.log_agent_action("auto_push", {"success": False, "error": str(e)})
+            print(f"[AGENT] Auto-push failed: {e}")
+            return False
     
     def run_continuous(self, check_interval=30):
         """Run the agent continuously"""
