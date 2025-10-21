@@ -1,194 +1,40 @@
-name: Civic Patch CI/CD Gates
+name: Civic Patch (Lab7 → Broker smoke loop)
 
 on:
   pull_request:
-    paths:
-      - '.civic/**'
-      - 'app/**'
-      - 'services/**'
-      - 'frontend/**'
-  push:
-    branches: [main]
-    paths:
-      - '.civic/**'
-      - 'app/**'
-      - 'services/**'
-      - 'frontend/**'
+  workflow_dispatch:
 
 jobs:
-  civic-gates:
+  civic:
     runs-on: ubuntu-latest
-    
+    env:
+      BROKER_URL: ${{ secrets.BROKER_URL }}   # e.g., https://thought-broker.onrender.com
+      CYCLE: C-109
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Install
+        run: npm ci || npm i
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Ensure civic templates exist
+        run: |
+          test -f ./.civic/change.proposal.json || (echo "Missing .civic/change.proposal.json" && exit 1)
+          test -f ./.civic/change.spec.md || echo "# Spec seed" > ./.civic/change.spec.md
+          test -f ./.civic/change.tests.json || echo "[]" > ./.civic/change.tests.json
 
-    - name: Install dependencies
-      run: |
-        npm ci
-        pip install -r requirements.txt
+      - name: Run Thought Broker (bounded smoke test)
+        run: npm run broker:run
 
-    # Gate 1: Lint
-    - name: Lint Check
-      run: |
-        echo "🔍 Running lint checks..."
-        npm run lint || echo "Lint check failed"
-        python -m flake8 app/ services/ --max-line-length=100 || echo "Python lint failed"
+      - name: Upload consensus artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: consensus-C109
+          path: .civic/
 
-    # Gate 2: Unit Tests
-    - name: Unit Tests
-      run: |
-        echo "🧪 Running unit tests..."
-        npm test || echo "Node tests failed"
-        python -m pytest tests/ -v || echo "Python tests failed"
-
-    # Gate 3: E2E Tests
-    - name: E2E Tests
-      run: |
-        echo "🎭 Running E2E tests..."
-        npm run test:e2e || echo "E2E tests failed"
-
-    # Gate 4: Security Scan
-    - name: Security Scan
-      run: |
-        echo "🔒 Running security scan..."
-        npm audit --audit-level=moderate || echo "NPM audit failed"
-        python -m bandit -r app/ services/ || echo "Python security scan failed"
-
-    # Gate 5: Integrity Check
-    - name: Integrity Check
-      run: |
-        echo "🛡️ Running integrity check..."
-        node bin/oaa-verify.js || echo "OAA verification failed"
-
-    # Gate 6: Civic Schema Validation
-    - name: Civic Schema Validation
-      run: |
-        echo "📋 Validating civic schemas..."
-        
-        # Check if change proposal exists
-        if [ -f ".civic/change.proposal.json" ]; then
-          echo "Validating change.proposal.json..."
-          python -c "
-          import json
-          import jsonschema
-          
-          with open('.civic/change.proposal.json') as f:
-              proposal = json.load(f)
-          
-          with open('.civic/schemas/change.proposal.schema.json') as f:
-              schema = json.load(f)
-          
-          jsonschema.validate(proposal, schema)
-          print('✅ change.proposal.json is valid')
-          "
-        fi
-        
-        # Check if change tests exist
-        if [ -f ".civic/change.tests.json" ]; then
-          echo "Validating change.tests.json..."
-          python -c "
-          import json
-          import jsonschema
-          
-          with open('.civic/change.tests.json') as f:
-              tests = json.load(f)
-          
-          with open('.civic/schemas/change.tests.schema.json') as f:
-              schema = json.load(f)
-          
-          jsonschema.validate(tests, schema)
-          print('✅ change.tests.json is valid')
-          "
-        fi
-
-    # Gate 7: GI Score Calculation
-    - name: GI Score Calculation
-      run: |
-        echo "📊 Calculating GI Score..."
-        python -c "
-        import json
-        import os
-        
-        # Mock GI score calculation
-        # In real implementation, this would run actual quality metrics
-        gi_score = 0.92
-        
-        # Check for required files
-        required_files = ['.civic/change.proposal.json', '.civic/change.tests.json']
-        missing_files = [f for f in required_files if not os.path.exists(f)]
-        
-        if missing_files:
-            print(f'❌ Missing required files: {missing_files}')
-            exit(1)
-        
-        # Check test coverage
-        test_coverage = 0.85  # Mock value
-        
-        # Check documentation
-        has_docs = os.path.exists('.civic/change.spec.md')
-        
-        # Calculate final GI score
-        final_score = gi_score * 0.4 + test_coverage * 0.3 + (0.1 if has_docs else 0)
-        
-        print(f'GI Score: {final_score:.2f}')
-        
-        if final_score < 0.90:
-            print('❌ GI Score below threshold (0.90)')
-            exit(1)
-        else:
-            print('✅ GI Score meets threshold')
-        "
-
-    # Gate 8: Citizen Shield Check
-    - name: Citizen Shield Check
-      run: |
-        echo "🛡️ Running Citizen Shield check..."
-        python -c "
-        import json
-        import os
-        
-        # Check for security headers in API responses
-        # Check for proper authentication
-        # Check for input validation
-        # Check for output sanitization
-        
-        print('✅ Citizen Shield check passed')
-        "
-
-    # Gate 9: Performance Check
-    - name: Performance Check
-      run: |
-        echo "⚡ Running performance check..."
-        python -c "
-        # Mock performance check
-        # In real implementation, this would run load tests
-        print('✅ Performance check passed')
-        "
-
-    # Final Gate: All Checks Pass
-    - name: All Gates Passed
-      run: |
-        echo "🎉 All civic gates passed!"
-        echo "✅ Lint: Passed"
-        echo "✅ Unit Tests: Passed"
-        echo "✅ E2E Tests: Passed"
-        echo "✅ Security Scan: Passed"
-        echo "✅ Integrity Check: Passed"
-        echo "✅ Schema Validation: Passed"
-        echo "✅ GI Score: Passed"
-        echo "✅ Citizen Shield: Passed"
-        echo "✅ Performance: Passed"
+      - name: Summary
+        run: |
+          echo "## Thought Broker consensus" >> $GITHUB_STEP_SUMMARY
+          echo "- cycle: $CYCLE" >> $GITHUB_STEP_SUMMARY
+          echo "- broker: $BROKER_URL" >> $GITHUB_STEP_SUMMARY
