@@ -9,17 +9,20 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
-    "prisma:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/see  "dependencies": {
+    "prisma:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
+  },
+  "dependencies": {
     "@prisma/client": "^5.19.1",
     "@radix-ui/react-progress": "^1.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "lucide-react": "^0.545.0",
     "next": "^14.2.33",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.0.0"
-  },t-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",
