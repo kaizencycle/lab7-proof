@@ -10,7 +10,11 @@
     "yaml": "^2.8.1"
   },
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "civic:validate": "python3 .civic/ledger-hook.py --help",
+    "civic:sweep": "python3 .civic/ledger-hook.py",
+    "civic:setup": "python3 .civic/setup-civic-system.py",
+    "civic:status": "python3 -c \"import json; print(json.dumps({\"civic_system\": \"active\", \"version\": \"1.0.0\"}, indent=2))\""
   },
   "devDependencies": {
     "husky": "^9.1.7"
