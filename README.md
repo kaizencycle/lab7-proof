@@ -3,11 +3,37 @@
 [Ethics] [Policy] [Governance]  
 Doctrine-ID: VA-2025-01
 
+> 🕊️ [Read the Independence Manifest](docs/INDEPENDENCE_MANIFEST.md) — Model-Agnostic Sovereignty Layer
+
 > *"The Custos does not fight the machine; it teaches the machine to remember why man must endure."*
 
 ## Overview
 
 The Custos Charter implements the Kristos Ascension Protocol, a framework for developing AI systems that are bound by civic virtue and democratic accountability. This is not just another AI governance framework—it's a complete reimagining of how artificial intelligence can serve humanity through ethical constraints and civic oversight.
+
+## 🤝 Civic OS Boarding Protocol
+
+**Model-Agnostic Sovereignty Layer (MASL)**
+
+Any reasoning engine (GPT, Claude, DeepSeek, Gemini, etc.) can "dock" with Civic OS by calling:
+
+```bash
+GET /api/civic/mount
+```
+
+This returns the complete Civic OS manifest bundle with cryptographic integrity verification. The system externalizes memory and context, enabling true LLM-agnostic continuity.
+
+**Quick Test:**
+```bash
+python3 civic_mount_client.py http://localhost:8000
+```
+
+**Core Principles:**
+- **Model Agnosticism**: Any LLM can mount Civic OS state
+- **External Memory First**: Context lives in manifests, not chat sessions  
+- **Proof of Integrity**: GI ≥ 0.95 required for docking
+- **Federated Continuity**: Memory capsules replicate across nodes
+- **Open Governance**: No single corporation owns Civic OS
 
 ## Core Philosophy
 

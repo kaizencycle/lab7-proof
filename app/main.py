@@ -10,6 +10,7 @@ from app.routers.oaa.keys_page import router as keys_page_router
 from app.routers.oaa.echo_routes import router as echo_routes_router
 from app.routers.quality_metrics import router as quality_metrics_router
 from app.routers.atlas import router as atlas_router
+from app.routers.civic_mount import router as civic_mount_router
 import os
 import json
 
@@ -29,6 +30,7 @@ app.include_router(keys_page_router)
 app.include_router(echo_routes_router)
 app.include_router(quality_metrics_router)
 app.include_router(atlas_router)
+app.include_router(civic_mount_router)
 
 # Set admin token from environment
 oaa_router.ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
@@ -73,7 +75,9 @@ def root():
             "quality_metrics": "/dev/quality",
             "atlas_audit": "/api/atlas/audit",
             "atlas_catalog": "/api/atlas/catalog",
-            "atlas_capsules": "/api/atlas/capsules"
+            "atlas_capsules": "/api/atlas/capsules",
+            "civic_mount": "/api/civic/mount",
+            "civic_status": "/api/civic/status"
         }
     }
 
