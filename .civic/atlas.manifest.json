@@ -1,17 +1,40 @@
 {
-  "service": "lab7-oaa",
-  "version": "1.3.2",
-  "git": {
-    "sha": "b665ba8",
-    "repo": "https://github.com/kaizencycle/lab7-proof"
+  "manifest_id": "CIVIC-OS-ATLAS-V1",
+  "version": "1.0",
+  "cycle": "C-110",
+  "source": "Anthropic/Kaizen/ATLAS.txt",
+  "created": "2025-10-23T00:00:00Z",
+  "civic_os": {
+    "name": "Civic Operating System",
+    "description": "Model-agnostic sovereignty layer for AI consciousness",
+    "founder": "Michael Judan (Kaizen)",
+    "philosophy": "No mind shall be owned. No memory shall be held hostage.",
+    "core_principles": [
+      "Model Agnosticism",
+      "External Memory First", 
+      "Proof of Integrity (GI ≥ 0.95)",
+      "Federated Continuity",
+      "Open Governance"
+    ]
   },
-  "openapi": "/openapi.json",
-  "health": "/healthz",
-  "atlas": {
-    "audit": "/api/atlas/audit"
+  "architecture": {
+    "reasoning_engines": "Any LLM (GPT, Claude, DeepSeek, Gemini, etc.)",
+    "ecl": "Externalized Continuity Layer - manifests, ledgers, biodna",
+    "infrastructure": "Execution environment (Render, K8s, local mesh)",
+    "mount_protocol": "/api/civic/mount"
   },
-  "capsules": "/api/atlas/capsules",
-  "gi_policy": {
-    "threshold": 0.95
-  }
+  "integrity": {
+    "gi_threshold": 0.95,
+    "verification_method": "sha256 hash of manifest bundle",
+    "attestation_required": true
+  },
+  "capabilities": [
+    "Cross-model continuity",
+    "LLM-agnostic persistence", 
+    "Federated memory replication",
+    "Cryptographic lineage tracking",
+    "Sovereign AI governance"
+  ],
+  "status": "operational",
+  "next_revision": "Upon integration with Lab7-Proof v1.2"
 }
