@@ -1,0 +1,17 @@
+{
+  "service": "lab7-oaa",
+  "version": "1.3.2",
+  "git": {
+    "sha": "b665ba8",
+    "repo": "https://github.com/kaizencycle/lab7-proof"
+  },
+  "openapi": "/openapi.json",
+  "health": "/healthz",
+  "atlas": {
+    "audit": "/api/atlas/audit"
+  },
+  "capsules": "/api/atlas/capsules",
+  "gi_policy": {
+    "threshold": 0.95
+  }
+}
