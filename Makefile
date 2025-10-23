@@ -1,6 +1,6 @@
 PY=python3
 
-.PHONY: eci-run ledger-mock test hooks install-hooks
+.PHONY: eci-run ledger-mock test hooks install-hooks atlas-audit atlas-test
 
 eci-run:
 	@echo "Running ECI orchestrator (DRY_RUN=$${DRY_RUN:-true})"
@@ -21,6 +21,15 @@ hooks:
 
 install-hooks: hooks
 	@echo "Git hooks installed."
+
+# ATLAS Sentinel commands
+atlas-audit:
+	@echo "Running ATLAS audit..."
+	$(PY) tools/atlas_auditor.py $(shell git diff --name-only HEAD~1)
+
+atlas-test:
+	@echo "Testing ATLAS auditor..."
+	$(PY) tools/atlas_auditor.py --help
 
 # Convenience: run the whole local loop (mock ledger + orchestrator)
 run-local:

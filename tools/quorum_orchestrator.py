@@ -2,17 +2,26 @@
 """
 ECI Orchestrator — Ethical Continuous Integration for DVA
 Pipeline:
-  GPT(author) → DeepSeek(parse/lint) → Cursor(repo ops/tests) → Claude(audit)
+  GPT(author) → DeepSeek(parse/lint) → Cursor(repo ops/tests) → ATLAS(audit)
   → GPT(quorum) → Attest to Ledger → (optional) Canary
 
 This uses mocked agent calls you can swap with real APIs.
 Quorum rule (default): require ≥3/4 model approvals + human dual-seal.
+ATLAS integration: Quality & Integrity Gate with GI Score calculation.
 """
 
 import os, sys, json, time, hashlib, subprocess, argparse
 from pathlib import Path
 import yaml
 import requests
+
+# Import ATLAS auditor
+try:
+    from atlas_auditor import AtlasAuditor
+    ATLAS_AVAILABLE = True
+except ImportError:
+    ATLAS_AVAILABLE = False
+    print("Warning: ATLAS auditor not available, falling back to basic audit")
 
 # ---------- Config ----------
 QUORUM_THRESHOLD = 3  # of 4 model votes
@@ -98,15 +107,53 @@ def cursor_scaffold_and_test(bundle_dir: Path, repo_dir: Path) -> dict:
     (ARTIFACT_DIR / "cursor_report.json").write_text(json.dumps(rep,indent=2))
     return rep
 
-def claude_audit(repo_dir: Path) -> dict:
-    """Mock: scan for risky patterns (very simple)."""
+def atlas_audit(repo_dir: Path) -> dict:
+    """ATLAS Sentinel: Comprehensive quality & integrity audit with GI Score."""
+    if not ATLAS_AVAILABLE:
+        # Fallback to basic audit
+        return claude_audit_fallback(repo_dir)
+    
+    try:
+        # Get all files in repo for ATLAS audit
+        files = [str(p) for p in repo_dir.rglob("*") if p.is_file()]
+        
+        # Initialize ATLAS auditor
+        auditor = AtlasAuditor()
+        
+        # Run full ATLAS audit
+        results = auditor.run_full_audit(files)
+        
+        # Save ATLAS attestation
+        auditor.save_attestation(results, str(ARTIFACT_DIR / "atlas_attestation.json"))
+        
+        # Convert to legacy format for quorum
+        rep = {
+            "agent": "atlas",
+            "ok": results["approved_for_quorum"],
+            "gi_score": results["phases"]["gi_score"]["total"],
+            "quality": results["phases"]["quality"],
+            "drift": results["phases"]["drift"],
+            "charter": results["phases"]["charter"],
+            "attestation_hash": results["attestation"]["hash"],
+            "cycle": results["cycle"]
+        }
+        
+        (ARTIFACT_DIR / "atlas_report.json").write_text(json.dumps(rep, indent=2))
+        return rep
+        
+    except Exception as e:
+        print(f"ATLAS audit failed: {e}")
+        return claude_audit_fallback(repo_dir)
+
+def claude_audit_fallback(repo_dir: Path) -> dict:
+    """Fallback: Basic audit when ATLAS is not available."""
     risky = []
     for p in repo_dir.rglob("*.py"):
         txt = p.read_text(encoding="utf-8")
         if "eval(" in txt or "subprocess.Popen(" in txt:
             risky.append(str(p))
     ok = len(risky) == 0
-    rep = {"agent":"claude","ok":ok,"risky_files":risky}
+    rep = {"agent":"claude_fallback","ok":ok,"risky_files":risky}
     (ARTIFACT_DIR / "claude_report.json").write_text(json.dumps(rep,indent=2))
     return rep
 
@@ -153,11 +200,11 @@ def main():
     # 3) Repo + tests
     cursor = cursor_scaffold_and_test(bundle, repo_dir)
 
-    # 4) Audit
-    claude = claude_audit(repo_dir)
+    # 4) ATLAS Audit
+    atlas = atlas_audit(repo_dir)
 
     # 5) Quorum
-    quorum = gpt_quorum([gpt, deepseek, cursor, claude])
+    quorum = gpt_quorum([gpt, deepseek, cursor, atlas])
 
     # 6) Human dual-seal check (environment-protected approval step)
     seals = {}
@@ -181,7 +228,7 @@ def main():
             {"name":"gpt","report":"gpt_report.json"},
             {"name":"deepseek","report":"deepseek_report.json"},
             {"name":"cursor","report":"cursor_report.json"},
-            {"name":"claude","report":"claude_report.json"},
+            {"name":"atlas","report":"atlas_report.json"},
             {"name":"gpt_quorum","report":"quorum_report.json"},
         ],
         "repo": {"path": str(repo_dir)},
