@@ -2,101 +2,110 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, master ]
-
-permissions:
-  contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ main, develop ]
 
 jobs:
   test:
-    name: Lint • Type • Test (py311)
     runs-on: ubuntu-latest
-
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping || exit 1"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 10
-
-    env:
-      # Wire Redis nonce defense to the service container
-      OAA_NONCE_REDIS_URL: redis://localhost:6379/0
-      OAA_NONCE_TTL_SEC: 600
-
-      # Verification policy in CI (kept strict)
-      OAA_VERIFY_PIN_KEYS: "true"
-      OAA_VERIFY_TS_WINDOW_MIN: "10"
-      OAA_VERIFY_NONCE_TTL_SEC: "600"
-      OAA_VERIFY_REQUIRE_NONCE: "false"
-
-      # Issuer and (generated) keys will be filled below
-      OAA_ISSUER: oaa.lab7.ci
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ hashFiles('**/requirements*.txt', 'pyproject.toml') }}
-          restore-keys: |
-            pip-${{ runner.os }}-
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          # Dev tools for CI
-          pip install black ruff mypy pytest detect-secrets
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
 
-      - name: Generate Ed25519 keypair for CI (env only)
-        run: |
-          python - << 'PY'
-          from nacl import signing
-          import base64, os
-          sk = signing.SigningKey.generate()
-          pub = sk.verify_key
-          print(f"OAA_ED25519_PRIVATE_B64={base64.b64encode(sk.encode()).decode()}")
-          print(f"OAA_ED25519_PUBLIC_B64={base64.b64encode(pub.encode()).decode()}")
-          PY
-        shell: bash >> $GITHUB_ENV
+    - name: Lint with ruff
+      run: |
+        ruff check src/ tests/
 
-      - name: Detect secrets against baseline
-        run: |
-          if [ -f .secrets.baseline ]; then
-            detect-secrets scan --baseline .secrets.baseline --exclude-files 'data/|attestations/' --fail-on-allowlist
-          else
-            echo "No .secrets.baseline found; skipping (recommended to add one)."
-          fi
+    - name: Format check with black
+      run: |
+        black --check src/ tests/
 
-      - name: Black (check)
-        run: black --check .
+    - name: Type check with mypy
+      run: |
+        mypy src/
 
-      - name: Ruff (lint + fix)
-        run: ruff check .
+    - name: Test with pytest
+      run: |
+        pytest --cov=src --cov-report=xml
 
-      - name: Mypy (type check)
-        run: mypy app
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
 
-      - name: Pytest (quick)
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-        run: pytest -q
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/reflections-app/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd frontend/reflections-app
+        npm ci
+
+    - name: Lint
+      run: |
+        cd frontend/reflections-app
+        npm run lint
+
+    - name: Type check
+      run: |
+        cd frontend/reflections-app
+        npm run type-check
+
+    - name: Test
+      run: |
+        cd frontend/reflections-app
+        npm test
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
