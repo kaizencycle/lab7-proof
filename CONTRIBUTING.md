@@ -1,174 +1,257 @@
-# Contributing to Custos Charter
+# Contributing to Lab7 OAA
 
-[Ethics] [Policy] [Governance]  
-Doctrine-ID: VA-2025-01
+Thank you for your interest in contributing to Lab7 OAA! This document provides guidelines and information for contributors.
 
-Thank you for your interest in contributing to the Custos Charter project! This document outlines the guidelines and processes for contributing to this ethical AI governance framework.
+## Code of Conduct
 
-## Overview
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold this code.
 
-The Custos Charter implements the Kristos Ascension Protocol, a framework for developing AI systems that are bound by civic virtue and democratic accountability. All contributions must align with our core principles of transparency, accountability, and ethical governance.
+## Getting Started
 
-## Core Principles
+### Prerequisites
 
-Before contributing, please familiarize yourself with our foundational principles:
+- Python 3.11+
+- Node.js 18+
+- Git
+- Docker (optional)
 
-1. **Civic-boundedness**: Any action with non-consensual consequences requires explicit civic quorum and attestation
-2. **Least-privilege perception**: Sensors/processes run only with explicit contextual permission and time-bounded tokens
-3. **Trace & attest**: All observations, recommendations, and actions are cryptographically attested and append-only on the ledger
-4. **Right-to-appeal & human veto**: Human jurors can pause/override any agent decision within a guaranteed time window
-5. **No autonomous lethal action**: The agent may recommend, flag, or assist — it may not execute lethal or coerced actions itself
-6. **Transparency tiering**: Aggregate mode for public dashboards; raw sensitive streams require higher clearance + attestation
+### Development Setup
 
-## Virtue Tags and Doctrine IDs
+1. **Fork and clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/lab7-oaa.git
+   cd lab7-oaa
+   ```
 
-All policy, ethics, and governance-related files must include proper doctrine tags and IDs:
+2. **Set up the backend:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   pip install -r requirements-dev.txt
+   ```
 
-### Required Tags
-- `[Ethics]` - For files dealing with ethical considerations
-- `[Policy]` - For files containing policy definitions
-- `[Governance]` - For files related to governance structures
+3. **Set up the frontend:**
+   ```bash
+   cd frontend/reflections-app
+   npm install
+   ```
 
-### Required Doctrine ID
-Every tagged file must include a `Doctrine-ID:` line with a canonical identifier:
-```
-Doctrine-ID: VA-2025-01
-```
-
-### Examples
-
-**Good:**
-```markdown
-# Security Policy
-[Policy] [Governance]
-Doctrine-ID: VA-2025-01
-
-This document outlines our security policies...
-```
-
-**Bad:**
-```markdown
-# Security Policy
-This document outlines our security policies...
-```
+4. **Set up pre-commit hooks:**
+   ```bash
+   pre-commit install
+   ```
 
 ## Development Workflow
 
-### 1. Pre-commit Hooks
+### Branch Naming
 
-We use pre-commit hooks to enforce virtue policy checks. Install them:
+Use descriptive branch names with prefixes:
 
-```bash
-make install-hooks
-```
+- `feature/description` - New features
+- `fix/description` - Bug fixes
+- `docs/description` - Documentation updates
+- `refactor/description` - Code refactoring
+- `test/description` - Test improvements
 
-### 2. Local Development
+### Commit Messages
 
-Use the provided Makefile shortcuts:
-
-```bash
-# Run tests
-make test
-
-# Start mock ledger server
-make ledger-mock
-
-# Run ECI orchestrator locally
-make eci-run
-
-# Run with human seals (simulated approval)
-make eci-run DRY_RUN=false ANCHOR_SIGNER=yes CUSTODIAN_SIGNER=yes
-```
-
-### 3. Ethical CI Pipeline
-
-All changes go through our Ethical CI (ECI) pipeline:
-
-1. **Author**: GPT generates code from prompts
-2. **Parse/Lint**: DeepSeek validates syntax and structure
-3. **Repo + Tests**: Cursor scaffolds and runs tests
-4. **Audit**: Claude scans for risky patterns
-5. **Quorum**: GPT determines if 3/4 models approve
-6. **Attestation**: Results are logged to the ledger
-
-### 4. Pull Request Process
-
-1. Create a feature branch
-2. Ensure all files have proper virtue tags and doctrine IDs
-3. Run `make test` to verify tests pass
-4. Run `make eci-run` to test the ECI pipeline
-5. Submit a pull request with a clear description
-6. The ECI pipeline will automatically run and require human approval
-
-## File Structure
+Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
 ```
-├── CUSTOS_CHARTER.md          # Main charter document
-├── tools/
-│   ├── quorum_orchestrator.py # ECI pipeline orchestrator
-│   ├── virtue_policy_check.py # Doctrine enforcement
-│   └── ledger_mock_server.py  # Local testing server
-├── tests/                     # Test modules
-├── .github/workflows/         # GitHub Actions
-├── PROMPT.md                  # ECI authoring template
-├── Makefile                   # Development shortcuts
-└── requirements.txt           # Python dependencies
+type(scope): description
+
+[optional body]
+
+[optional footer(s)]
 ```
 
-## Code Standards
+Examples:
+- `feat(api): add verification endpoint`
+- `fix(crypto): handle invalid key format`
+- `docs(readme): update installation instructions`
+
+### Pull Request Process
+
+1. **Create a feature branch** from `main`
+2. **Make your changes** following the coding standards
+3. **Add tests** for new functionality
+4. **Update documentation** if needed
+5. **Run the test suite** and ensure all tests pass
+6. **Submit a pull request** with a clear description
+
+### Pull Request Template
+
+```markdown
+## Description
+Brief description of changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Manual testing completed
+
+## Checklist
+- [ ] Code follows style guidelines
+- [ ] Self-review completed
+- [ ] Documentation updated
+- [ ] No breaking changes (or documented)
+```
+
+## Coding Standards
 
 ### Python
-- Follow PEP 8 style guidelines
-- Use type hints where appropriate
-- Include docstrings for all functions and classes
-- Write tests for new functionality
 
-### Documentation
-- Use clear, concise language
-- Include examples where helpful
-- Maintain the virtue tag system
-- Update CHANGELOG.md for significant changes
+- Follow [PEP 8](https://pep8.org/) style guidelines
+- Use [Black](https://black.readthedocs.io/) for code formatting
+- Use [isort](https://pycqa.github.io/isort/) for import sorting
+- Use [mypy](https://mypy.readthedocs.io/) for type checking
+- Maximum line length: 88 characters
+
+### TypeScript/JavaScript
+
+- Use [Prettier](https://prettier.io/) for code formatting
+- Follow [ESLint](https://eslint.org/) rules
+- Use meaningful variable and function names
+- Add JSDoc comments for public APIs
+
+### General
+
+- Write clear, self-documenting code
+- Add comments for complex logic
+- Use meaningful commit messages
+- Keep functions small and focused
+- Follow the DRY principle
 
 ## Testing
 
-We use pytest for testing. All new code must include appropriate tests:
+### Backend Testing
 
 ```bash
 # Run all tests
-make test
+pytest
+
+# Run with coverage
+pytest --cov=src
 
 # Run specific test file
-python -m pytest tests/test_specific.py -v
+pytest tests/test_verification.py
+
+# Run with verbose output
+pytest -v
 ```
 
-## Security Considerations
+### Frontend Testing
+
+```bash
+cd frontend/reflections-app
+
+# Run tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run in watch mode
+npm run test:watch
+```
+
+### Test Requirements
+
+- **Unit tests**: Test individual functions and methods
+- **Integration tests**: Test API endpoints and database interactions
+- **End-to-end tests**: Test complete user workflows
+- **Coverage**: Maintain at least 80% code coverage
+
+## Documentation
+
+### Code Documentation
+
+- Use docstrings for all public functions and classes
+- Follow [Google docstring format](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
+- Include type hints for all function parameters and return values
+
+### API Documentation
+
+- Update OpenAPI specifications for API changes
+- Include examples for all endpoints
+- Document error responses and status codes
+
+### User Documentation
+
+- Update README.md for significant changes
+- Add or update guides in the `docs/` directory
+- Include screenshots for UI changes
+
+## Security
+
+### Security Considerations
 
 - Never commit secrets or API keys
 - Use environment variables for sensitive configuration
-- Follow the principle of least privilege
-- Ensure all external dependencies are from trusted sources
+- Validate all inputs thoroughly
+- Follow secure coding practices
+- Report security vulnerabilities privately
 
-## Red Lines
+### Reporting Security Issues
 
-The following are strictly prohibited:
+If you discover a security vulnerability, please report it privately:
 
-- Building covert surveillance capabilities
-- Creating ways to bypass quorum/attestation
-- Allowing autonomous kinetic or lethal control
-- Centralizing attestation under a single private actor
-- Hiding logs or providing non-auditable override channels
+1. Email: security@lab7-oaa.com
+2. Include a detailed description
+3. Include steps to reproduce
+4. Do not create public issues for security vulnerabilities
 
-## Getting Help
+## Release Process
 
-- Check existing issues and discussions
-- Review the Custos Charter for philosophical guidance
-- Consult the Virtue Accords for ethical principles
-- Ask questions in a respectful, constructive manner
+### Version Numbering
+
+We follow [Semantic Versioning](https://semver.org/):
+
+- **MAJOR**: Incompatible API changes
+- **MINOR**: New functionality (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
+
+### Release Checklist
+
+- [ ] All tests pass
+- [ ] Documentation updated
+- [ ] Changelog updated
+- [ ] Version bumped
+- [ ] Release notes prepared
+- [ ] Security review completed
+
+## Community
+
+### Getting Help
+
+- **GitHub Issues**: For bug reports and feature requests
+- **Discussions**: For questions and general discussion
+- **Discord**: For real-time chat (link in README)
+
+### Recognition
+
+Contributors will be recognized in:
+- CONTRIBUTORS.md file
+- Release notes
+- Project documentation
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the same terms as the project.
+By contributing to Lab7 OAA, you agree that your contributions will be licensed under the MIT License.
 
----
+## Questions?
 
-*Remember: The Custos does not fight the machine; it teaches the machine to remember why man must endure.*
+If you have any questions about contributing, please:
+
+1. Check existing [GitHub Issues](https://github.com/lab7-oaa/lab7-oaa/issues)
+2. Start a [GitHub Discussion](https://github.com/lab7-oaa/lab7-oaa/discussions)
+3. Contact the maintainers
+
+Thank you for contributing to Lab7 OAA! 🚀
