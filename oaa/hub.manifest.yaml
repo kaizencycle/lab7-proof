@@ -13,6 +13,18 @@ labs:
     status: "active"
     description: "Cryptographic verification and digital integrity services"
     
+  - id: lab7-proof
+    name: "Lab7-Proof: Apprenticeship & Civic Education"
+    routes: ["/docs/lab7/*", "/accords/registry/*"]
+    status: "active"
+    description: "Cultural and linguistic foundations of integrity pedagogy"
+    entries:
+      - id: "Entry-004"
+        title: "The Evolution of Language | From Cave Symbols to Kaizen Code"
+        accord_id: "VA-EDU-001"
+        date: "2025-10-26"
+        status: "active"
+    
   - id: lab4-frontend
     name: "Frontend Dashboard"
     routes: ["/", "/oaa"]
