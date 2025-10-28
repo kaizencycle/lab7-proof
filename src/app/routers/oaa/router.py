@@ -11,7 +11,7 @@ from .store import upsert_source, list_sources, record_vote, summarize_reputatio
 from .keys import keyset
 from .state import build_state, sign_state, anchor_to_ledger
 from .echo_routes import router as echo_router
-from app.crypto.ed25519 import ed25519_sign, ed25519_verify, canonical_json, sha256_hex
+from ...crypto.ed25519 import ed25519_sign, ed25519_verify, canonical_json, sha256_hex
 
 router = APIRouter(prefix="/oaa", tags=["OAA"])
 

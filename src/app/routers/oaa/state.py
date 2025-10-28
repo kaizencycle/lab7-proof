@@ -2,7 +2,7 @@
 import time, os
 from typing import Dict, Any, List, Tuple
 from datetime import datetime
-from app.crypto.ed25519 import ed25519_sign, sha256_hex
+from ...crypto.ed25519 import ed25519_sign, sha256_hex
 from .store import SOURCES, SCORES, VOTES
 
 def build_state() -> Dict[str, Any]:

@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 from fastapi import HTTPException, Header
 import base64
 import hashlib
-from app.crypto.ed25519 import ed25519_verify, canonical_json
+from ..crypto.ed25519 import ed25519_verify, canonical_json
 
 def verify_gi_score(x_gi_score: Optional[str] = Header(None), min_threshold: float = 0.95) -> float:
     """

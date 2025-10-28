@@ -1,6 +1,6 @@
 # app/routers/health_redis.py
 from fastapi import APIRouter
-from app.utils.nonce_store import get_redis
+from ..utils.nonce_store import get_redis
 
 router = APIRouter()
 

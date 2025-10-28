@@ -6,9 +6,9 @@ import os
 import json
 import hashlib
 import base64
-from app.crypto.ed25519 import ed25519_verify, canonical_json, sha256_hex
-from app.utils.capsule_verify import verify_capsule as verify_capsule_util
-from app.utils.security import validate_shield_headers, log_security_event
+from ..crypto.ed25519 import ed25519_verify, canonical_json, sha256_hex
+from ..utils.capsule_verify import verify_capsule as verify_capsule_util
+from ..utils.security import validate_shield_headers, log_security_event
 
 router = APIRouter(prefix="/api/atlas", tags=["atlas"])
 
