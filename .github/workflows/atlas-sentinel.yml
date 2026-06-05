@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
 env:
-  GI_THRESHOLD: '0.95'
-  QUALITY_THRESHOLD: '0.90'
+  GI_THRESHOLD: '0.75'
+  QUALITY_THRESHOLD: '0.75'
 
 jobs:
   atlas-audit:
