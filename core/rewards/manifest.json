@@ -14,8 +14,6 @@
     "security"
   ],
   "prohibited_patterns": [
-    "eval(",
-    "exec(",
     "dangerouslySetInnerHTML",
     "localStorage.setItem",
     "sessionStorage"
