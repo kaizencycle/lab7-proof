@@ -1,1 +1,1 @@
-from .router import router  # re-export
+from .router import router as router  # explicit re-export

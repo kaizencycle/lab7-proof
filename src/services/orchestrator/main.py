@@ -1,22 +1,30 @@
-from fastapi import FastAPI, HTTPException, APIRouter
 from datetime import datetime
-from typing import Dict
 
-from .models import (
-    StartSessionRequest, StartSessionResponse, TurnRequest, TurnResponse,
-    SubmitRequest, SubmitResponse, RubricScores,
-    AttestationCommitRequest, AttestationCommitResponse,
-    RewardIntentRequest, RewardIntentResponse, BalanceResponse,
-    CritiqueRequest, CritiqueResponse
-)
+from fastapi import APIRouter, FastAPI, HTTPException
+
 from .adapters import route_to_mentors
-from .shield import scan, passes_mint_gates
-from .xp import xp_from_rubric, level_after
 from .attest import commit_attestation
-from .rewards import maybe_mint
-from .indexer import apply_tx, get_balance
 from .critique import critique_text
+from .indexer import apply_tx, get_balance
+from .models import (
+    AttestationCommitRequest,
+    AttestationCommitResponse,
+    BalanceResponse,
+    CritiqueRequest,
+    CritiqueResponse,
+    RewardIntentRequest,
+    RewardIntentResponse,
+    StartSessionRequest,
+    StartSessionResponse,
+    SubmitRequest,
+    SubmitResponse,
+    TurnRequest,
+    TurnResponse,
+)
+from .rewards import maybe_mint
 from .rubric_client import score_async
+from .shield import passes_mint_gates, scan
+from .xp import level_after, xp_from_rubric
 
 app = FastAPI(title="lab7-proof OAA Orchestrator", version="0.1.0")
 
@@ -24,16 +32,19 @@ app = FastAPI(title="lab7-proof OAA Orchestrator", version="0.1.0")
 api = APIRouter(prefix="/v1")
 
 # In-memory demo stores (swap to Postgres/Redis later)
-_SESSIONS: Dict[str, Dict] = {}     # session_id -> {user_id, mentors, total_xp, level}
-_USER_WALLETS: Dict[str, str] = {}  # user_id -> wallet (demo)
+_SESSIONS: dict[str, dict] = {}  # session_id -> {user_id, mentors, total_xp, level}
+_USER_WALLETS: dict[str, str] = {}  # user_id -> wallet (demo)
+
 
 def _mk_session_id(user_id: str) -> str:
     return f"sess_{user_id}_{int(datetime.utcnow().timestamp())}"
+
 
 def _get_wallet(user_id: str) -> str:
     if user_id not in _USER_WALLETS:
         _USER_WALLETS[user_id] = f"gic_{user_id[-6:]}"
     return _USER_WALLETS[user_id]
+
 
 @api.post("/session/start", response_model=StartSessionResponse)
 def start_session(req: StartSessionRequest):
@@ -43,13 +54,12 @@ def start_session(req: StartSessionRequest):
         "mentors": req.mentors,
         "total_xp": 0,
         "level": 1,
-        "turns": []
+        "turns": [],
     }
     return StartSessionResponse(
-        session_id=session_id,
-        mentors=req.mentors,
-        started_at=datetime.utcnow()
+        session_id=session_id, mentors=req.mentors, started_at=datetime.utcnow()
     )
+
 
 @api.post("/session/turn", response_model=TurnResponse)
 def session_turn(req: TurnRequest):
@@ -59,7 +69,10 @@ def session_turn(req: TurnRequest):
     mentors = req.tools or sess["mentors"]
     drafts = route_to_mentors(req.prompt, mentors)
     sess["turns"].append({"prompt": req.prompt, "drafts": drafts})
-    return TurnResponse(session_id=req.session_id, drafts=drafts, meta={"mentors_used": mentors})
+    return TurnResponse(
+        session_id=req.session_id, drafts=drafts, meta={"mentors_used": mentors}
+    )
+
 
 @api.post("/session/submit", response_model=SubmitResponse)
 async def session_submit(req: SubmitRequest):
@@ -93,7 +106,7 @@ async def session_submit(req: SubmitRequest):
         user_id=req.user_id,
         mentors_used=mentors_used,
         rubric=rubric,
-        xp_awarded=xp
+        xp_awarded=xp,
     )
     att: AttestationCommitResponse = commit_attestation(att_req)
 
@@ -101,7 +114,9 @@ async def session_submit(req: SubmitRequest):
     reward_tx_id = None
     balance_after = None
     if after > before:
-        ok_mint, reasons = passes_mint_gates(rubric, attestation_sig_present=bool(att.sig))
+        ok_mint, reasons = passes_mint_gates(
+            rubric, attestation_sig_present=bool(att.sig)
+        )
         if not ok_mint:
             # Level up but no mint due to policy; still return attestation/xp
             return SubmitResponse(
@@ -110,7 +125,7 @@ async def session_submit(req: SubmitRequest):
                 level_before=before,
                 level_after=after,
                 reward_tx_id=None,
-                balance_after=None
+                balance_after=None,
             )
         # proceed to mint
         rew_req = RewardIntentRequest(
@@ -118,7 +133,7 @@ async def session_submit(req: SubmitRequest):
             attestation_id=att.attestation_id,
             level_before=before,
             level_after=after,
-            xp_total=sess["total_xp"]
+            xp_total=sess["total_xp"],
         )
         res = maybe_mint(rew_req)
         if res:
@@ -133,8 +148,9 @@ async def session_submit(req: SubmitRequest):
         level_before=before,
         level_after=after,
         reward_tx_id=reward_tx_id,
-        balance_after=balance_after
+        balance_after=balance_after,
     )
+
 
 @api.post("/session/critique", response_model=CritiqueResponse)
 async def session_critique(req: CritiqueRequest):
@@ -143,11 +159,14 @@ async def session_critique(req: CritiqueRequest):
     text = critique_text(req.prompt, req.answer, rubric)
     return CritiqueResponse(rubric=rubric, critique=text)
 
+
 # ----- Internal endpoints (stubs you can wire to separate services) -----
+
 
 @api.post("/attest/commit", response_model=AttestationCommitResponse)
 def attest_commit(req: AttestationCommitRequest):
     return commit_attestation(req)
+
 
 @api.post("/reward/intent", response_model=RewardIntentResponse)
 def reward_intent(req: RewardIntentRequest):
@@ -159,38 +178,47 @@ def reward_intent(req: RewardIntentRequest):
     apply_tx(wallet, res.amount, res.tx_id)
     return res
 
+
 @api.get("/ledger/balance/{user_id}", response_model=BalanceResponse)
 def ledger_balance(user_id: str):
     wallet = _get_wallet(user_id)
     return get_balance(wallet)
 
+
 # Include the v1 router
 app.include_router(api)
+
 
 # Legacy endpoints for backward compatibility
 @app.post("/session/start", response_model=StartSessionResponse)
 def start_session_legacy(req: StartSessionRequest):
     return start_session(req)
 
+
 @app.post("/session/turn", response_model=TurnResponse)
 def session_turn_legacy(req: TurnRequest):
     return session_turn(req)
+
 
 @app.post("/session/submit", response_model=SubmitResponse)
 async def session_submit_legacy(req: SubmitRequest):
     return await session_submit(req)
 
+
 @app.post("/session/critique", response_model=CritiqueResponse)
 async def session_critique_legacy(req: CritiqueRequest):
     return await session_critique(req)
+
 
 @app.post("/attest/commit", response_model=AttestationCommitResponse)
 def attest_commit_legacy(req: AttestationCommitRequest):
     return attest_commit(req)
 
+
 @app.post("/reward/intent", response_model=RewardIntentResponse)
 def reward_intent_legacy(req: RewardIntentRequest):
     return reward_intent(req)
+
 
 @app.get("/ledger/balance/{user_id}", response_model=BalanceResponse)
 def ledger_balance_legacy(user_id: str):

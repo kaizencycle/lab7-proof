@@ -1,0 +1,12 @@
+{
+  "name": "lab7-proof",
+  "version": "0.1.0",
+  "description": "Lab7 Proof — Online Apprenticeship Agent (Python API service)",
+  "private": true,
+  "scripts": {
+    "lint": "echo 'Lint: Python repo — run ruff via CI python job' && exit 0",
+    "type-check": "echo 'Type-check: Python repo — run mypy via CI python job' && exit 0",
+    "test": "echo 'Tests: Python repo — run pytest via CI python job' && exit 0",
+    "broker:run": "node -e \"const url = process.env.BROKER_URL; if (!url) { console.log('BROKER_URL not configured — skipping smoke test'); process.exit(0); } else { console.log('Broker URL: ' + url); process.exit(0); }\""
+  }
+}

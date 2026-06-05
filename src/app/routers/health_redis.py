@@ -1,8 +1,10 @@
 # app/routers/health_redis.py
 from fastapi import APIRouter
+
 from ..utils.nonce_store import get_redis
 
 router = APIRouter()
+
 
 @router.get("/_health/redis")
 async def redis_health():

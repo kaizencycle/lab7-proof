@@ -1,28 +1,31 @@
-import yaml
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any
+
+import yaml
+
 from .models import Source, SourceScore
 
 DEFAULT_PATH = Path(__file__).with_name("default_policy.yaml")
 
+
 class Policy:
-    def __init__(self, spec: Dict[str, Any]):
+    def __init__(self, spec: dict[str, Any]):
         self.spec = spec
         self.rules = spec.get("rules", [])
-        self.default_effect = spec.get("defaults","review")
+        self.default_effect = spec.get("defaults", "review")
 
     @classmethod
-    def load(cls, p: Path|None = None) -> "Policy":
+    def load(cls, p: Path | None = None) -> "Policy":
         path = p or DEFAULT_PATH
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         return cls(data)
 
-    def eval(self, src: Source, score: SourceScore) -> Tuple[str, List[str]]:
+    def eval(self, src: Source, score: SourceScore) -> tuple[str, list[str]]:
         """
         Return (effect, reasons)
         effect in {"pass","deny","review"}
         """
-        reasons: List[str] = []
+        reasons: list[str] = []
         effect_order = {"deny": 0, "review": 1, "pass": 2}
         final_effect = self.default_effect
 
@@ -38,12 +41,13 @@ class Policy:
 
         if src.last_update:
             from datetime import datetime
+
             ctx["last_update_days"] = (datetime.utcnow() - src.last_update).days
 
         for r in self.rules:
-            rid = r.get("id","rule")
-            when = r.get("when","")
-            effect = r.get("effect","review")
+            rid = r.get("id", "rule")
+            when = r.get("when", "")
+            effect = r.get("effect", "review")
             try:
                 # CAUTION: eval on trusted policy only (your own YAML)
                 if eval(when, {}, ctx):
@@ -55,6 +59,7 @@ class Policy:
                 reasons.append(f"{rid}:error")
 
         return final_effect, reasons
+
 
 def apply_policy(policy: Policy, src: Source, score: SourceScore) -> SourceScore:
     eff, reasons = policy.eval(src, score)

@@ -1,31 +1,52 @@
-from fastapi import APIRouter, HTTPException, Header, BackgroundTasks
-from typing import Optional, List
+import os
+import time
+import uuid
 from datetime import datetime
-import httpx
-import os, time, uuid, asyncio
 
-from .models import IngestRequest, FilterRequest, FilterResult, Source, SourceScore, ReputeVote, ReputeResult, VerifyRequest, VerifyResponse
-from .scoring import score_source
-from .policy import Policy, apply_policy
-from .store import upsert_source, list_sources, record_vote, summarize_reputation, votes_count, SOURCES, SCORES
-from .keys import keyset
-from .state import build_state, sign_state, anchor_to_ledger
+import httpx
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException
+
+from ...crypto.ed25519 import ed25519_sign, ed25519_verify, sha256_hex
 from .echo_routes import router as echo_router
-from ...crypto.ed25519 import ed25519_sign, ed25519_verify, canonical_json, sha256_hex
+from .keys import keyset
+from .models import (
+    FilterRequest,
+    FilterResult,
+    IngestRequest,
+    ReputeResult,
+    ReputeVote,
+    Source,
+    VerifyRequest,
+    VerifyResponse,
+)
+from .policy import Policy, apply_policy
+from .scoring import score_source
+from .state import anchor_to_ledger, build_state, sign_state
+from .store import (
+    SCORES,
+    SOURCES,
+    list_sources,
+    record_vote,
+    summarize_reputation,
+    upsert_source,
+    votes_count,
+)
 
 router = APIRouter(prefix="/oaa", tags=["OAA"])
 
 ADMIN_TOKEN = None  # set from env in main if you like
 
-def _require_admin(x_admin_token: Optional[str]):
+
+def _require_admin(x_admin_token: str | None):
     if ADMIN_TOKEN and x_admin_token != ADMIN_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
+
 @router.post("/ingest/snapshot")
-async def ingest_snapshot(req: IngestRequest, x_admin_token: Optional[str] = Header(None)):
+async def ingest_snapshot(req: IngestRequest, x_admin_token: str | None = Header(None)):
     _require_admin(x_admin_token)
 
-    sources: List[Source] = []
+    sources: list[Source] = []
 
     if req.sources:
         sources = req.sources
@@ -38,12 +59,18 @@ async def ingest_snapshot(req: IngestRequest, x_admin_token: Optional[str] = Hea
             for item in payload:
                 try:
                     # basic normalization
-                    item.setdefault("id", item.get("id") or item.get("name","").lower().replace(" ","-"))
+                    item.setdefault(
+                        "id",
+                        item.get("id")
+                        or item.get("name", "").lower().replace(" ", "-"),
+                    )
                     # coerce last_update if present
                     if "last_update" in item and isinstance(item["last_update"], str):
                         try:
-                            item["last_update"] = datetime.fromisoformat(item["last_update"].replace("Z",""))
-                        except:
+                            item["last_update"] = datetime.fromisoformat(
+                                item["last_update"].replace("Z", "")
+                            )
+                        except Exception:
                             item.pop("last_update", None)
                     s = Source(**item)
                     sources.append(s)
@@ -59,11 +86,24 @@ async def ingest_snapshot(req: IngestRequest, x_admin_token: Optional[str] = Hea
         sc = score_source(s)
         sc, reasons = apply_policy(pol, s, sc)
         upsert_source(s, sc)
-        results.append({"id": s.id, "composite": sc.composite, "gate": sc.policy_gate, "reasons": reasons})
+        results.append(
+            {
+                "id": s.id,
+                "composite": sc.composite,
+                "gate": sc.policy_gate,
+                "reasons": reasons,
+            }
+        )
         added += 1
 
     # TODO: anchor snapshot hash to Civic Ledger here
-    return {"ok": True, "added": added, "results": results, "policy": "default_policy.yaml"}
+    return {
+        "ok": True,
+        "added": added,
+        "results": results,
+        "policy": "default_policy.yaml",
+    }
+
 
 @router.post("/filter", response_model=FilterResult)
 async def filter_source(req: FilterRequest):
@@ -72,15 +112,14 @@ async def filter_source(req: FilterRequest):
     sc, reasons = apply_policy(pol, req.source, sc)
     return FilterResult(score=sc, reasons=reasons)
 
+
 @router.get("/sources")
-def get_sources(min_score: float = 0.0, gate: Optional[str] = None):
+def get_sources(min_score: float = 0.0, gate: str | None = None):
     items = []
     for src, sc in list_sources(min_score=min_score, gate=gate):
-        items.append({
-            "source": src.model_dump(),
-            "score": sc.model_dump()
-        })
+        items.append({"source": src.model_dump(), "score": sc.model_dump()})
     return {"count": len(items), "items": items}
+
 
 @router.post("/repute/vote", response_model=ReputeResult)
 async def repute_vote(v: ReputeVote):
@@ -117,7 +156,7 @@ async def repute_vote(v: ReputeVote):
 
     attestation = None
     priv_b64 = os.getenv("OAA_ED25519_PRIVATE_B64", "")
-    pub_b64  = os.getenv("OAA_ED25519_PUBLIC_B64", "")
+    pub_b64 = os.getenv("OAA_ED25519_PUBLIC_B64", "")
     ledger_url = os.getenv("LEDGER_URL", "").rstrip("/")
     try:
         if priv_b64 and pub_b64:
@@ -141,12 +180,14 @@ async def repute_vote(v: ReputeVote):
         ok=True,
         new_reputation=new_rep,
         total_votes=votes_count(v.source_id),
-        attestation=attestation
+        attestation=attestation,
     )
+
 
 @router.get("/.well-known/oaa-keys.json")
 def well_known_keys():
     return keyset()
+
 
 @router.get("/state/snapshot")
 def get_state_snapshot():
@@ -154,11 +195,12 @@ def get_state_snapshot():
     # Also return hash for quick diffing
     return {"snapshot": snap, "hash": "sha256:" + sha256_hex(snap)}
 
+
 @router.post("/state/anchor")
-async def post_state_anchor(x_admin_token: Optional[str] = Header(None)):
+async def post_state_anchor(x_admin_token: str | None = Header(None)):
     _require_admin(x_admin_token)
     snap = build_state()
-    att  = sign_state(snap)
+    att = sign_state(snap)
     try:
         receipt = await anchor_to_ledger(att)
         att["ledger_receipt"] = receipt
@@ -166,21 +208,25 @@ async def post_state_anchor(x_admin_token: Optional[str] = Header(None)):
         att["ledger_error"] = str(e)
     return {"ok": True, "attestation": att}
 
+
 @router.post("/cron/daily")
-async def cron_daily(background: BackgroundTasks, x_admin_token: Optional[str] = Header(None)):
+async def cron_daily(
+    background: BackgroundTasks, x_admin_token: str | None = Header(None)
+):
     _require_admin(x_admin_token)
+
     # run anchor in background so cron returns fast
     async def _job():
         snap = build_state()
-        att  = sign_state(snap)
+        att = sign_state(snap)
         try:
-            receipt = await anchor_to_ledger(att)
-            # you could write to disk or log here if desired
+            await anchor_to_ledger(att)
         except Exception:
             pass
 
     background.add_task(_job)
     return {"ok": True, "queued": True, "ts": time.time()}
+
 
 @router.post("/verify", response_model=VerifyResponse)
 async def verify_attestation(req: VerifyRequest):
@@ -189,37 +235,32 @@ async def verify_attestation(req: VerifyRequest):
     """
     try:
         att = req.attestation
-        
+
         # 1) Check hash
-        canon = canonical_json(att["content"])
         recomputed = sha256_hex(att["content"])
         got = att.get("content_hash", "").replace("sha256:", "")
-        
+
         if not got or got != recomputed:
             return VerifyResponse(
-                ok=False,
-                reason="hash_mismatch",
-                recomputed_hash=recomputed
+                ok=False, reason="hash_mismatch", recomputed_hash=recomputed
             )
 
         # 2) Verify signature
         if not att.get("signature", "").startswith("ed25519:"):
             return VerifyResponse(
-                ok=False,
-                reason="bad_sig_format",
-                recomputed_hash=recomputed
+                ok=False, reason="bad_sig_format", recomputed_hash=recomputed
             )
-        
+
         sig_b64 = att["signature"].split(":", 1)[1]
         pub_b64 = att["public_key_b64"]
-        
+
         # Check if signer is known (optional key pinning)
         signer_known = True
         try:
             keyset_data = keyset()
             allowed_pubs = {k["x"] for k in keyset_data.get("keys", [])}
             signer_known = pub_b64 in allowed_pubs
-        except:
+        except Exception:
             signer_known = None  # keyset unavailable
 
         # 3) Check timestamp freshness (optional)
@@ -232,7 +273,7 @@ async def verify_attestation(req: VerifyRequest):
                 diff_minutes = abs((now - ts).total_seconds()) / 60
                 ts_window = int(os.getenv("OAA_VERIFY_TS_WINDOW_MIN", "10"))
                 ts_ok = diff_minutes <= ts_window
-            except:
+            except Exception:
                 ts_ok = None  # timestamp parsing failed
 
         # 4) Nonce replay defense (basic check - would need Redis for production)
@@ -242,7 +283,7 @@ async def verify_attestation(req: VerifyRequest):
 
         # 5) Verify Ed25519 signature
         sig_ok = ed25519_verify(pub_b64, att["content"], sig_b64)
-        
+
         if not sig_ok:
             return VerifyResponse(
                 ok=False,
@@ -250,7 +291,7 @@ async def verify_attestation(req: VerifyRequest):
                 recomputed_hash=recomputed,
                 signer_known=signer_known,
                 ts_ok=ts_ok,
-                nonce_ok=nonce_ok
+                nonce_ok=nonce_ok,
             )
 
         return VerifyResponse(
@@ -258,24 +299,20 @@ async def verify_attestation(req: VerifyRequest):
             recomputed_hash=recomputed,
             signer_known=signer_known,
             ts_ok=ts_ok,
-            nonce_ok=nonce_ok
+            nonce_ok=nonce_ok,
         )
 
     except KeyError as e:
-        return VerifyResponse(
-            ok=False,
-            reason=f"missing_field: {str(e)}"
-        )
+        return VerifyResponse(ok=False, reason=f"missing_field: {str(e)}")
     except Exception as e:
-        return VerifyResponse(
-            ok=False,
-            reason=f"verification_error: {str(e)}"
-        )
+        return VerifyResponse(ok=False, reason=f"verification_error: {str(e)}")
+
 
 @router.get("/_health/redis")
 async def redis_health():
     # Placeholder for Redis health check
     return {"ok": False, "error": "Redis not configured"}
+
 
 # Include echo routes
 router.include_router(echo_router)

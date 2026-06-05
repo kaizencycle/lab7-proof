@@ -1,9 +1,10 @@
 # Lab7-Proof /middleware/auth.py
 # Secure API key verification + audit logging
 
-import os
 import datetime
-from fastapi import Request, HTTPException
+import os
+
+from fastapi import HTTPException, Request
 
 API_KEY = os.getenv("API_KEY")
 
@@ -21,8 +22,16 @@ async def verify_api_key(request: Request):
     key = request.headers.get("x-api-key")
     lab_id = request.headers.get("x-lab-id", "unknown").lower()
 
-    # Basic validation
-    if key != API_KEY:
+    # C-332: fail CLOSED. Previously `if key != API_KEY` passed when API_KEY was
+    # unset (None) and the caller sent no header (None) — `None != None` is False,
+    # so a misconfigured deploy authenticated everyone. Reject when the server has
+    # no key configured, when the caller sends no key, or on mismatch.
+    if not API_KEY:
+        # Server misconfiguration must not become an open door.
+        raise HTTPException(
+            status_code=503, detail="Auth unavailable: API_KEY not configured"
+        )
+    if not key or key != API_KEY:
         raise HTTPException(status_code=401, detail="Unauthorized: Invalid API key")
 
     # Timestamp + source logging
