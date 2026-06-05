@@ -1,9 +1,12 @@
 # app/routers/health_auth.py
-from fastapi import APIRouter, Depends
 from datetime import datetime
+
+from fastapi import APIRouter, Depends
+
 from ..middleware.auth import verify_api_key
 
 router = APIRouter()
+
 
 @router.get("/health/auth")
 async def health_auth(_=Depends(verify_api_key)):

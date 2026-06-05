@@ -1,6 +1,9 @@
-import hashlib, time
+import hashlib
+import time
 from datetime import datetime
+
 from .models import AttestationCommitRequest, AttestationCommitResponse
+
 
 def commit_attestation(req: AttestationCommitRequest) -> AttestationCommitResponse:
     # Create a fake merkle root from fields
@@ -8,7 +11,9 @@ def commit_attestation(req: AttestationCommitRequest) -> AttestationCommitRespon
     merkle_root = hashlib.sha256(payload.encode()).hexdigest()
     sig = hashlib.sha256((merkle_root + ":ed25519_stub").encode()).hexdigest()
     gi_snapshot = 0.99  # demo constant; wire to GI calc later
-    attestation_id = hashlib.sha1((merkle_root + str(time.time())).encode()).hexdigest()[:16]
+    attestation_id = hashlib.sha1(
+        (merkle_root + str(time.time())).encode()
+    ).hexdigest()[:16]
     return AttestationCommitResponse(
         attestation_id=attestation_id,
         gi_snapshot=gi_snapshot,

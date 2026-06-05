@@ -1,4 +1,5 @@
-import os, asyncio
+import os
+
 import redis.asyncio as redis
 
 _redis_url = os.getenv("OAA_NONCE_REDIS_URL")
@@ -7,6 +8,7 @@ _ttl = int(os.getenv("OAA_NONCE_TTL_SEC", "600") or "600")
 # Lazy global
 _redis: redis.Redis | None = None
 
+
 async def get_redis() -> redis.Redis:
     global _redis
     if _redis is None:
@@ -14,6 +16,7 @@ async def get_redis() -> redis.Redis:
             raise RuntimeError("OAA_NONCE_REDIS_URL not configured")
         _redis = redis.from_url(_redis_url, decode_responses=True)
     return _redis
+
 
 async def nonce_seen(voter_id: str, nonce: str) -> bool:
     """Returns True if already seen, False otherwise (and records)."""

@@ -4,13 +4,14 @@
 # Version: 1.0
 # Date: 2025-10-23
 
-from fastapi import APIRouter, Request, HTTPException
-from datetime import datetime
 import hashlib
-import json
 import os
+from datetime import datetime
+
+from fastapi import APIRouter, Request
 
 router = APIRouter()
+
 
 def _compute_manifest_hash(files):
     """Compute combined sha256 of all civic manifests."""
@@ -20,6 +21,7 @@ def _compute_manifest_hash(files):
             with open(f, "rb") as fh:
                 sha.update(fh.read())
     return sha.hexdigest()
+
 
 @router.get("/api/civic/mount")
 def civic_mount(request: Request):
@@ -32,7 +34,7 @@ def civic_mount(request: Request):
     manifests = [
         "./.civic/atlas.manifest.json",
         "./.civic/biodna.json",
-        "./.civic/virtue_accords.yaml"
+        "./.civic/virtue_accords.yaml",
     ]
 
     # Build base URL for fully-qualified manifest URLs
@@ -41,7 +43,7 @@ def civic_mount(request: Request):
 
     # Compute GI signature over file contents
     gi_signature = _compute_manifest_hash(manifests)
-    
+
     response = {
         "manifest_bundle": manifests,
         "manifest_urls": manifest_urls,
@@ -56,11 +58,12 @@ def civic_mount(request: Request):
             "step_2": "Compute sha256 hash of all manifest contents",
             "step_3": "Verify computed hash matches gi_signature",
             "step_4": "Parse manifests to reconstruct Civic OS context",
-            "step_5": "Attest to integrity (GI ≥ 0.95) to complete docking"
-        }
+            "step_5": "Attest to integrity (GI ≥ 0.95) to complete docking",
+        },
     }
 
     return response
+
 
 @router.get("/api/civic/status")
 def civic_status():
@@ -70,37 +73,34 @@ def civic_status():
     manifests = [
         "./.civic/atlas.manifest.json",
         "./.civic/biodna.json",
-        "./.civic/virtue_accords.yaml"
+        "./.civic/virtue_accords.yaml",
     ]
-    
+
     status = {
         "civic_os_status": "operational",
         "manifests": {},
-        "overall_health": "healthy"
+        "overall_health": "healthy",
     }
-    
+
     for manifest in manifests:
         if os.path.exists(manifest):
             try:
-                with open(manifest, "r") as f:
-                    data = json.load(f) if manifest.endswith('.json') else f.read()
+                with open(manifest):
+                    pass  # just verify it's readable
                 status["manifests"][manifest] = {
                     "exists": True,
                     "size": os.path.getsize(manifest),
-                    "readable": True
+                    "readable": True,
                 }
             except Exception as e:
                 status["manifests"][manifest] = {
                     "exists": True,
                     "size": os.path.getsize(manifest),
                     "readable": False,
-                    "error": str(e)
+                    "error": str(e),
                 }
         else:
-            status["manifests"][manifest] = {
-                "exists": False,
-                "readable": False
-            }
+            status["manifests"][manifest] = {"exists": False, "readable": False}
             status["overall_health"] = "degraded"
-    
+
     return status

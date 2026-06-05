@@ -2,8 +2,10 @@
 import importlib
 import pathlib
 
+
 def test_generated_module_exists():
     assert pathlib.Path("module.py").exists()
+
 
 def test_value_constant_is_reasonable():
     m = importlib.import_module("module")

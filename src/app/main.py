@@ -1,23 +1,24 @@
+import json
+import os
+
 from fastapi import FastAPI, HTTPException
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
-from .routers.oaa import router as oaa_router
+
+from .routers.atlas import router as atlas_router
+from .routers.civic_mount import router as civic_mount_router
 from .routers.health import router as health_router
 from .routers.health_auth import router as health_auth_router
 from .routers.health_redis import router as health_redis_router
-from .routers.oaa.verify_history import router as verify_history_router
-from .routers.oaa.keys_page import router as keys_page_router
+from .routers.oaa import router as oaa_router
 from .routers.oaa.echo_routes import router as echo_routes_router
+from .routers.oaa.keys_page import router as keys_page_router
+from .routers.oaa.verify_history import router as verify_history_router
 from .routers.quality_metrics import router as quality_metrics_router
-from .routers.atlas import router as atlas_router
-from .routers.civic_mount import router as civic_mount_router
-import os
-import json
 
 app = FastAPI(
     title="Lab7 – Open Attestation Authority (OAA)",
     description="Cryptographic attestation and verification engine for the Kaizen DVA ecosystem",
-    version="1.0.1"
+    version="1.0.1",
 )
 
 # Include routers
@@ -35,11 +36,13 @@ app.include_router(civic_mount_router)
 # Set admin token from environment
 oaa_router.ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 
+
 # Health aliases for frontend compatibility
 @app.get("/health")
 @app.get("/healthz")
 def health_root():
     return JSONResponse({"status": "ok", "service": "oaa", "version": app.version})
+
 
 # ATLAS manifest endpoint
 @app.get("/.civic/atlas.manifest.json")
@@ -47,13 +50,16 @@ def atlas_manifest():
     """Serve the ATLAS manifest for this service"""
     manifest_path = ".civic/atlas.manifest.json"
     try:
-        with open(manifest_path, "r") as f:
+        with open(manifest_path) as f:
             manifest = json.load(f)
         return JSONResponse(manifest)
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="ATLAS manifest not found")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Invalid ATLAS manifest format")
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="ATLAS manifest not found") from exc
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=500, detail="Invalid ATLAS manifest format"
+        ) from exc
+
 
 @app.get("/")
 def root():
@@ -77,7 +83,6 @@ def root():
             "atlas_catalog": "/api/atlas/catalog",
             "atlas_capsules": "/api/atlas/capsules",
             "civic_mount": "/api/civic/mount",
-            "civic_status": "/api/civic/status"
-        }
+            "civic_status": "/api/civic/status",
+        },
     }
-

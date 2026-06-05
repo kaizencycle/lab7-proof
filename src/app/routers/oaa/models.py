@@ -1,67 +1,80 @@
-from pydantic import BaseModel, AnyHttpUrl, Field
-from typing import Any, List, Optional, Dict, Literal
 from datetime import datetime
+from typing import Any, Literal
+
+from pydantic import AnyHttpUrl, BaseModel
+
 
 class Endpoint(BaseModel):
     path: str
-    method: Literal["GET","POST","PUT","DELETE","PATCH"] = "GET"
-    schema: Optional[str] = None
-    notes: Optional[str] = None
+    method: Literal["GET", "POST", "PUT", "DELETE", "PATCH"] = "GET"
+    schema: str | None = None
+    notes: str | None = None
+
 
 class Source(BaseModel):
-    id: str                       # e.g. "src:public-apis:open-meteo"
+    id: str  # e.g. "src:public-apis:open-meteo"
     name: str
     domain: str
-    category: List[str] = []
-    auth: Literal["none","apiKey","oauth2","other"] = "none"
-    license: Optional[str] = None
-    owner: Optional[Dict[str,str]] = None
-    endpoints: List[Endpoint] = []
-    meta: Dict[str, str] = {}
-    last_update: Optional[datetime] = None
-    tags: List[str] = []
+    category: list[str] = []
+    auth: Literal["none", "apiKey", "oauth2", "other"] = "none"
+    license: str | None = None
+    owner: dict[str, str] | None = None
+    endpoints: list[Endpoint] = []
+    meta: dict[str, str] = {}
+    last_update: datetime | None = None
+    tags: list[str] = []
+
 
 class SourceScore(BaseModel):
     source_id: str
-    scores: Dict[str, float]      # provenance, permission, freshness, quality, safety, reputation
+    scores: dict[
+        str, float
+    ]  # provenance, permission, freshness, quality, safety, reputation
     composite: float
-    policy_gate: Literal["pass","deny","review"]
+    policy_gate: Literal["pass", "deny", "review"]
+
 
 class IngestRequest(BaseModel):
     # Option A: provide a URL to a JSON list of sources
-    url: Optional[AnyHttpUrl] = None
+    url: AnyHttpUrl | None = None
     # Option B: inline sources in request
-    sources: Optional[List[Source]] = None
+    sources: list[Source] | None = None
     # Optional: label for where we ingested from
     origin: str = "manual"
+
 
 class FilterRequest(BaseModel):
     source: Source
 
+
 class FilterResult(BaseModel):
     score: SourceScore
-    reasons: List[str] = []  # which rules fired
+    reasons: list[str] = []  # which rules fired
+
 
 class ReputeVote(BaseModel):
     source_id: str
     voter_id: str
     stake_gic: float = 0.0
-    opinion: Literal["up","down","neutral"] = "neutral"
-    comment: Optional[str] = None
+    opinion: Literal["up", "down", "neutral"] = "neutral"
+    comment: str | None = None
+
 
 class ReputeResult(BaseModel):
     ok: bool
     new_reputation: float
     total_votes: int
-    attestation: Optional[Dict[str, Any]] = None  # NEW
+    attestation: dict[str, Any] | None = None  # NEW
+
 
 class VerifyRequest(BaseModel):
-    attestation: Dict[str, Any]
+    attestation: dict[str, Any]
+
 
 class VerifyResponse(BaseModel):
     ok: bool
-    reason: Optional[str] = None
-    recomputed_hash: Optional[str] = None
-    signer_known: Optional[bool] = None
-    ts_ok: Optional[bool] = None
-    nonce_ok: Optional[bool] = None
+    reason: str | None = None
+    recomputed_hash: str | None = None
+    signer_known: bool | None = None
+    ts_ok: bool | None = None
+    nonce_ok: bool | None = None

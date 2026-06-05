@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 import os
+
+from pydantic import BaseModel
+
 
 class Settings(BaseModel):
     ENV: str = os.getenv("ENV", "dev")
@@ -11,5 +13,6 @@ class Settings(BaseModel):
 
     # Feature flags
     ENABLE_REWARDS: bool = os.getenv("ENABLE_REWARDS", "true").lower() == "true"
+
 
 settings = Settings()

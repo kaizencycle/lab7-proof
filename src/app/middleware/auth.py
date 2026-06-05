@@ -1,9 +1,10 @@
 # Lab7-Proof /middleware/auth.py
 # Secure API key verification + audit logging
 
-import os
 import datetime
-from fastapi import Request, HTTPException
+import os
+
+from fastapi import HTTPException, Request
 
 API_KEY = os.getenv("API_KEY")
 
@@ -27,7 +28,9 @@ async def verify_api_key(request: Request):
     # no key configured, when the caller sends no key, or on mismatch.
     if not API_KEY:
         # Server misconfiguration must not become an open door.
-        raise HTTPException(status_code=503, detail="Auth unavailable: API_KEY not configured")
+        raise HTTPException(
+            status_code=503, detail="Auth unavailable: API_KEY not configured"
+        )
     if not key or key != API_KEY:
         raise HTTPException(status_code=401, detail="Unauthorized: Invalid API key")
 

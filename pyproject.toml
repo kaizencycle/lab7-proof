@@ -41,7 +41,10 @@ exclude = '''
 target-version = "py311"
 line-length = 88
 select = ["E", "F", "I", "B", "UP"]
-ignore = ["E501"]  # line-length handled by Black
+ignore = [
+    "E501",   # line-length handled by Black
+    "B008",   # Depends() in default args is the standard FastAPI DI pattern
+]
 fix = true
 exclude = ["build", "dist", ".venv"]
 
