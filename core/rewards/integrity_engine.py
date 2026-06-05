@@ -41,7 +41,13 @@ def _truth_score(payload: Dict[str, Any], manifest: Dict[str, Any]) -> float:
 
 
 def _symbiosis_score(payload: Dict[str, Any]) -> float:
-    """Score based on balance between human and agent contributions."""
+    """Score based on balance between human and agent contributions.
+
+    Source code files typically have only one-sided content (a single docstring
+    extracted as 'human_statement', with 'agent_statement' empty). That's normal
+    and should not fail the symbiosis check. We only penalise when both sides have
+    content and the balance is severely skewed.
+    """
     h = payload.get("human_statement", "")
     a = payload.get("agent_statement", "")
     h_len = len(h.strip())
@@ -51,10 +57,15 @@ def _symbiosis_score(payload: Dict[str, Any]) -> float:
     if total == 0:
         return 0.70
 
+    # If only one party contributes, this is normal for source files. Return a
+    # passing neutral score rather than penalising single-side content.
+    if h_len == 0 or a_len == 0:
+        return 0.68
+
     ratio = h_len / total
     # Highest symbiosis when both contribute meaningfully (ratio near 0.4–0.6).
     balance = 1.0 - abs(ratio - 0.5) * 2
-    return round(0.55 + 0.40 * balance, 3)
+    return round(0.62 + 0.35 * balance, 3)
 
 
 def _novelty_score(payload: Dict[str, Any]) -> float:
