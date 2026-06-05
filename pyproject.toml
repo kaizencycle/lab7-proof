@@ -60,6 +60,8 @@ pretty = true
 [[tool.mypy.overrides]]
 module = [
     "src.app.routers.civic_mount",
+    "src.app.routers.oaa.keys_page",
+    "src.app.routers.oaa.models",
     "src.app.routers.oaa.policy",
     "src.app.routers.oaa.router",
     "src.app.routers.oaa.verify_history",
