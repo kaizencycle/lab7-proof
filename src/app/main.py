@@ -33,8 +33,8 @@ app.include_router(quality_metrics_router)
 app.include_router(atlas_router)
 app.include_router(civic_mount_router)
 
-# Set admin token from environment
-oaa_router.ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
+# Set admin token from environment (dynamic attr on router module object)
+oaa_router.ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")  # type: ignore[attr-defined]
 
 
 # Health aliases for frontend compatibility
